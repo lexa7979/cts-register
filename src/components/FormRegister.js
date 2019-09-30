@@ -21,16 +21,23 @@
  */
 
 import React from "react";
-import ReactDOM from "react-dom";
 
-import "./index.scss";
-import App from "./App";
+import Form from "./Form";
 
-import * as serviceWorker from "./serviceWorker";
+/**
+ * Component which will be used by users to register for the event.
+ */
+export class FormRegister extends React.Component {
+	// eslint-disable-next-line require-jsdoc
+	constructor( props ) {
+		super( props );
 
-ReactDOM.render( <App />, document.getElementById( "root" ) );
+		// eslint-disable-next-line no-console
+		this.handleSubmit = inputData => console.log( "Form was submitted", inputData );
+	}
 
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: https://bit.ly/CRA-PWA
-serviceWorker.unregister();
+	// eslint-disable-next-line require-jsdoc
+	render() {
+		return <Form handleSubmit={this.handleSubmit} formFields={this.formFields} />;
+	}
+}

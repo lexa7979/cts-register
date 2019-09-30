@@ -22,17 +22,20 @@
 
 import React from "react";
 
-import "./App.css";
+import "./App.scss";
+
+import { FormRegister } from "./components";
 
 /**
- * Base component which contains everything else.
+ * Base component which hosts everything else.
  */
 class App extends React.Component {
 	// eslint-disable-next-line class-methods-use-this,require-jsdoc
 	render() {
 		return (
 			<div className="app">
-				Cygni Tech Summit 2020
+				<h1>Cygni Tech Summit 2020</h1>
+				<FormRegister />
 			</div>
 		);
 	}
