@@ -26,15 +26,13 @@ import PropTypes from "prop-types";
 /**
  * Component which contains an input form.
  *
- * @property Component.formFields
- *		The needed input fields must be given as an object-property formFields.
+ * @property Component.fields
+ *		The needed input fields must be given as an object-property "fields".
  *		The following input types are supported:
- *		- "input" with needed settings "name", "type"
- *		  and optionally "label", "value", "placeholder", e.g.
- *				{ name: "fullname", type: "input", label: "What's your name?" }
- *		- "textarea" with needed settings "name", "type"
- *		  and optionally "label", "value", "placeholder", "cols", "rows", e.g.
- *	 			{ name: "comments", type: "textarea", placeholder: "Any comments?", rows: 3 }
+ *		- "input" with optional settings "label", "value", "placeholder", e.g.
+ *				fullname: { type: "input", label: "What's your name?" }
+ *		- "textarea" with optional settings "label", "value", "placeholder", "cols", "rows", e.g.
+ *	 			comments: { type: "textarea", placeholder: "Any comments?", rows: 3 }
  *		- "select"
  *		- "checkbox"
  *		- "hidden"
@@ -48,32 +46,21 @@ class Form extends React.Component {
 			inputValues: {},
 		};
 
-		const { formFields: fields } = this.props;
+		const { fields } = this.props;
 		this.fieldList = [];
 		for ( const name in fields ) {
 			if ( typeof name === "string" && name !== "" ) {
-				const { type } = fields[name];
+				const { type = "input", value = "" } = fields[name];
 				if ( typeof this[`${type}FieldGenerator`] !== "function" ) {
 					throw new Error( `Unsupported field type "${type}" (${name})` );
 				}
 				this.fieldList[name] = { ...fields[name], name, type };
+				this.state.inputValues[name] = value;
 			}
 		}
 
 		this.handleInputChange = this.handleInputChange.bind( this );
-	}
-
-	/**
-	 * Handles the change event of any form field
-	 *
-	 * @param	{object}	event
-	 *		Description of the event to handle
-	 */
-	handleInputChange( event ) {
-		const { name } = event.target;
-		const value = event.target.type === "checkbox" ? event.target.checked : event.target.value;
-
-		this.setState( { ...this.state.inputValues, [name]: value } );
+		this.onSubmit = this.onSubmit.bind( this );
 	}
 
 	/**
@@ -84,7 +71,7 @@ class Form extends React.Component {
 	 * @param	{null|string} 	label
 	 * @param	{object} 	inputComponent
 	 */
-	static labelBoxingGenerator( inputName, label, inputComponent ) {
+	labelBoxingGenerator( inputName, label, inputComponent ) {	// eslint-disable-line class-methods-use-this
 		if ( label ) {
 			return <div className="field labeled" key={inputName}>
 				<label htmlFor={inputName}>{label}</label>
@@ -110,7 +97,7 @@ class Form extends React.Component {
 			<input
 				name={data.name}
 				type="text"
-				value={this.state.inputValues[data.name] || "" }
+				value={this.state.inputValues[data.name]}
 				placeholder={data.placeholder || null}
 				onChange={this.handleInputChange}
 			/>
@@ -172,16 +159,41 @@ class Form extends React.Component {
 		return <input type="hidden" key={data.name} name={data.name} value={data.value} />;
 	}
 
+	/**
+	 * Handles the change event of any form field
+	 *
+	 * @param	{object}	event
+	 *		Description of the event to handle
+	 */
+	handleInputChange( event ) {
+		const { name } = event.target;
+		const value = event.target.type === "checkbox" ? event.target.checked : event.target.value;
+
+		this.setState( { inputValues: { ...this.state.inputValues, [name]: value } } );
+	}
+
+	/**
+	 *
+	 */
+	onSubmit( event ) {
+		event.preventDefault();
+
+		if ( typeof this.props.handleSubmit === "function" ) {
+			this.props.handleSubmit( this.state.inputValues );
+		}
+	}
+
 	// eslint-disable-next-line require-jsdoc
 	render() {
 		const formFields = [];
-		this.fieldList.forEach( fieldData => {
-			formFields.push( this[`${fieldData.type}FieldGenerator`]( fieldData ) );
-		} );
+		for ( const name in this.fieldList ) {	// eslint-disable-line guard-for-in
+			const data = this.fieldList[name];
+			formFields.push( this[`${data.type}FieldGenerator`]( data ) );
+		}
 
 		return <form
 			className={this.props.formClass ? `form ${this.props.formClass}` : "form"}
-			onSubmit={() => this.props.handleSubmit( this.state.inputValues )}
+			onSubmit={this.onSubmit}
 		>
 			<div className="fields">
 				{formFields}
@@ -195,7 +207,7 @@ class Form extends React.Component {
 
 Form.propTypes = {
 	formClass:    PropTypes.string,
-	formFields:   PropTypes.object.isRequired,
+	fields:       PropTypes.object.isRequired,
 	handleSubmit: PropTypes.func.isRequired,
 };
 

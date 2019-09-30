@@ -32,12 +32,16 @@ export class FormRegister extends React.Component {
 	constructor( props ) {
 		super( props );
 
+		this.formFields = {
+			firstname: { type: "input", label: "Firstname:", placeholder: "Type in your firstname?" },
+		};
+
 		// eslint-disable-next-line no-console
 		this.handleSubmit = inputData => console.log( "Form was submitted", inputData );
 	}
 
 	// eslint-disable-next-line require-jsdoc
 	render() {
-		return <Form handleSubmit={this.handleSubmit} formFields={this.formFields} />;
+		return <Form formClass="register" fields={this.formFields} handleSubmit={this.handleSubmit} />;
 	}
 }
