@@ -23,6 +23,14 @@
 import React from "react";
 import PropTypes from "prop-types";
 
+const propTypes = {
+	formClass:    PropTypes.string,
+	fields:       PropTypes.object.isRequired,
+	handleSubmit: PropTypes.func.isRequired,
+};
+
+const defaultProps = {};
+
 /**
  * Component which contains an input form.
  *
@@ -37,7 +45,7 @@ import PropTypes from "prop-types";
  *		- "checkbox"
  *		- "hidden"
  */
-class Form extends React.Component {
+export class Form extends React.Component {
 	// eslint-disable-next-line require-jsdoc
 	constructor( props ) {
 		super( props );
@@ -205,10 +213,7 @@ class Form extends React.Component {
 	}
 }
 
-Form.propTypes = {
-	formClass:    PropTypes.string,
-	fields:       PropTypes.object.isRequired,
-	handleSubmit: PropTypes.func.isRequired,
-};
+Form.propTypes = propTypes;
+Form.defaultProps = defaultProps;
 
 export default Form;

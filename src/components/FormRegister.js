@@ -24,6 +24,9 @@ import React from "react";
 
 import Form from "./Form";
 
+const propTypes = {};
+const defaultProps = {};
+
 /**
  * Component which will be used by users to register for the event.
  */
@@ -45,3 +48,8 @@ export class FormRegister extends React.Component {
 		return <Form formClass="register" fields={this.formFields} handleSubmit={this.handleSubmit} />;
 	}
 }
+
+FormRegister.propTypes = propTypes;
+FormRegister.defaultProps = defaultProps;
+
+export default FormRegister;

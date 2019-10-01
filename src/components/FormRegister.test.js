@@ -20,7 +20,15 @@
  * SOFTWARE.
  */
 
-export { Form } from "./Form";
-export { FormRegister } from "./FormRegister";
+import React from "react";
+import ReactDOM from "react-dom";
 
-export { Logo } from "./Logo";
+import FormRegister from "./FormRegister";
+
+describe( "Component FormRegister", () => {
+	it( "renders without crashing when no properties are given", () => {
+		const div = document.createElement( "div" );
+		ReactDOM.render( <FormRegister />, div );
+		ReactDOM.unmountComponentAtNode( div );
+	} );
+} );

@@ -24,18 +24,27 @@ import React from "react";
 
 import "./App.scss";
 
-import { FormRegister } from "./components";
+import { FormRegister, Logo } from "./components";
 
 /**
  * Base component which hosts everything else.
  */
-class App extends React.Component {
+export class App extends React.Component {
 	// eslint-disable-next-line class-methods-use-this,require-jsdoc
 	render() {
 		return (
 			<div className="app">
-				<h1>Cygni Tech Summit 2020</h1>
+				{/* <h1>Cygni Tech Summit 2020</h1> */}
+				<Logo
+					text={"CTS_\n2020"}
+					background="#323232"
+					color={[ "white", "#8cc63f" ]}
+					zoom={3}
+					ratio={1}
+					animation="running-point:black"
+				/>
 				<FormRegister />
+				<Logo text="LEXA" background="white" color="lightgreen" zoom={2} animation="running-point:red" />
 			</div>
 		);
 	}

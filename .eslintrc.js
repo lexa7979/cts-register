@@ -107,6 +107,17 @@ module.exports = {
 		"line-comment-position": "off",
 		"operator-linebreak": [ "error", "before" ],
 		"brace-style": [ "error", "1tbs", { allowSingleLine: true } ],
+		"no-mixed-operators": "off",
+		"lines-around-comment": [ "error", {
+			beforeLineComment: false,
+			beforeBlockComment: true,
+			afterLineComment: false,
+			allowClassStart: true,
+			allowObjectStart: true,
+		} ],
+		"no-plusplus": "off",
+		"dot-location": [ "error", "property" ],
+		"jest/no-large-snapshots": [ "warn", { maxSize: 50 } ],
 	},
 	// https://github.com/yannickcr/eslint-plugin-react#configuration
 	settings: {
