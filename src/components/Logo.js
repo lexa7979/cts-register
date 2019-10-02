@@ -21,52 +21,13 @@
  */
 /* eslint-disable class-methods-use-this */
 
+import assert from "assert";
+
 import React from "react";
 import PropTypes from "prop-types";
 
-/**
- * 00 01 02 03 04
- * 05 06 07 08 09
- * 10 11 12 13 14
- * 15 16 17 18 19
- * 20 21 22 23 24
- */
-
-/* eslint-disable array-element-newline */
-const POINTS = [
-	[ 0, 0 ], [ 1, 0 ], [ 2, 0 ], [ 3, 0 ], [ 4, 0 ],
-	[ 0, 1 ], [ 1, 1 ], [ 2, 1 ], [ 3, 1 ], [ 4, 1 ],
-	[ 0, 2 ], [ 1, 2 ], [ 2, 2 ], [ 3, 2 ], [ 4, 2 ],
-	[ 0, 3 ], [ 1, 3 ], [ 2, 3 ], [ 3, 3 ], [ 4, 3 ],
-	[ 0, 4 ], [ 1, 4 ], [ 2, 4 ], [ 3, 4 ], [ 4, 4 ],
-];
-/* eslint-enable array-element-newline */
-
-
-/* eslint-disable id-length */
-/**
- * ####s s#### ####s       s#### ####s
- * #       #   #               # #   #
- * #       #   #####        #### ##  #
- * #       #       #        #    # e #
- * ####e   e   e#### s###e  ###e #####
- */
-const CHARMAP = {
-	A: [ 20, 15, 10, 5, 1, 2, 3, 9, 14, 19, 24, 10, 11, 12, 13, 14 ],
-	C: [ 4, 3, 2, 1, 0, 5, 10, 15, 20, 21, 22, 23, 24 ],
-	E: [ 4, 3, 2, 1, 0, 5, 10, 15, 20, 21, 22, 23, 24, 11, 12 ],
-	L: [ 0, 5, 10, 15, 20, 21, 22, 23, 24 ],
-	S: [ 4, 3, 2, 1, 0, 5, 10, 11, 12, 13, 14, 19, 24, 23, 22, 21, 20 ],
-	T: [ 0, 1, 2, 3, 4, 7, 12, 17, 22 ],
-	X: [ 0, 6, 12, 18, 24, 4, 8, 12, 16, 20 ],
-
-	0: [ 4, 3, 2, 1, 0, 5, 10, 15, 20, 21, 22, 23, 24, 19, 14, 9, 11, 17 ],
-	2: [ 0, 1, 2, 3, 4, 9, 14, 13, 12, 11, 16, 21, 22, 23, 24 ],
-
-	_:   [ 20, 21, 22, 23, 24 ],
-	" ": [],
-};
-/* eslint-enable id-length */
+import SortedPointsList from "../classes/SortedPointsList";
+import DotMatrixCharacters from "../classes/DotMatrixCharacters";
 
 const propTypes = {
 	text:       PropTypes.string.isRequired,
@@ -103,7 +64,7 @@ export class Logo extends React.Component {
 		}
 
 		for ( let pos = 0; pos < text.length; pos++ ) {
-			if ( !/\r?\n/.test( text[pos] ) && !Array.isArray( CHARMAP[text[pos]] ) ) {
+			if ( !/\r?\n/.test( text[pos] ) && !DotMatrixCharacters.supports( text[pos] ) ) {
 				return false;
 			}
 		}
@@ -114,79 +75,202 @@ export class Logo extends React.Component {
 	/**
 	 * Initialising component
 	 */
-	constructor( props ) {
+	constructor( props ) {	// eslint-disable-line max-lines-per-function, max-statements
 		super( props );
 
 		this.textLines = this.props.text.split( /\r?\n/ );
-		this.sizes = {
-			height:     this.textLines.length,
-			width:      this.textLines.reduce( ( maxLength, line ) => Math.max( maxLength, line.length ), 0 ),
-			leftBorder: 0,
-			topBorder:  0,
-		};
-		this.sizes.extendX = this.props.zoom * ( 6 * this.sizes.width + 1 );
-		this.sizes.extendY = this.props.zoom * ( 6 * this.sizes.height + 1 );
 
-		if ( this.sizes.height > 0 && this.sizes.width > 0 && this.props.ratio > 0 ) {
-			if ( this.sizes.extendX > this.sizes.extendY * this.props.ratio ) {
-				this.sizes.topBorder = Math.floor(
-					Math.abs( this.sizes.extendY - Math.floor( this.sizes.extendX / this.props.ratio ) ) / 2
-				);
-				this.sizes.extendY = Math.floor( this.sizes.extendX / this.props.ratio );
-			} else if ( this.sizes.extendX < this.sizes.extendY * this.props.ratio ) {
-				this.sizes.leftBorder = Math.floor(
-					Math.abs( this.sizes.extendX - Math.floor( this.sizes.extendY * this.props.ratio ) ) / 2
-				);
-				this.sizes.extendX = Math.floor( this.sizes.extendY * this.props.ratio );
+		const textWidth = this.textLines.reduce( ( maxLen, line ) => Math.max( maxLen, line.length ), 0 );
+		const textHeight = this.textLines.length;
+
+		this.colorList = Array.isArray( this.props.color ) ? this.props.color : [ this.props.color || "white" ];
+		while ( this.colorList.length < textHeight ) {
+			this.colorList.push( this.colorList[this.colorList.length - 1] );
+		}
+
+		this.pointsList = new SortedPointsList();
+		let allCharIndex = 0;
+		this.textLines.forEach( ( textline, lineIndex ) => {
+			const lineStart = Math.floor( ( textWidth - textline.length ) / 2 );
+			const posY = 6 * lineIndex;
+			const color = this.colorList[lineIndex];
+			for ( let charPos = 0; charPos < textline.length; charPos++ ) {
+				const character = textline[charPos];
+				const posX = 6 * ( lineStart + charPos );
+				this.printCharacter( character, [ posX, posY ], { allCharIndex: allCharIndex++, color } );
+			}
+		} );
+
+		const stat = this.pointsList.getStats();
+		this.imageSizes = {
+			width:       this.props.zoom * ( stat.maxX + 3 ),
+			height:      this.props.zoom * ( stat.maxY + 3 ),
+			leftPadding: 0,
+			topPadding:  0,
+		};
+		if ( textWidth && textHeight && this.props.ratio ) {
+			const ratioWidth = this.imageSizes.height * this.props.ratio;
+			if ( this.imageSizes.width < ratioWidth ) {
+				this.imageSizes.leftPadding = Math.floor( ( ratioWidth - this.imageSizes.width ) / 2 );
+				this.imageSizes.width = ratioWidth;
+			} else if ( this.imageSizes.width > ratioWidth ) {
+				const ratioHeight = this.imageSizes.width / this.props.ratio;
+				this.imageSizes.topPadding = Math.floor( ( ratioHeight - this.imageSizes.height ) / 2 );
+				this.imageSizes.height = Math.floor( ratioHeight );
 			}
 		}
 
 		this.state = {
-			animation: null,
+			// animationPoint: null,
+			// animationSetup: this.props.animation
+			// 	? this.props.animation.split( ":" )
+			// 	: [],
 		};
 
-		this.animationSetup = this.props.animation
-			? this.props.animation.split( ":" )
-			: [];
+		// // this.animationSetup = this.props.animation
+		// // 	? this.props.animation.split( ":" )
+		// // 	: [];
 
-		this.animationStepForward = this.animationStepForward.bind( this );
+		// this.animationStepForward = this.animationStepForward.bind( this );
 	}
 
 	/**
-	 *
-	 */
+	 * Actions to take when component is ready
+	 * /
 	componentDidMount() {
-		this.animationStepForward();
+		if ( this.state.animationSetup.length === 0 ) {
+			return Promise.resolve();
+		}
+
+		switch ( this.state.animationSetup[0] ) {
+		case "running-point":
+			return this.animationPointFirst()
+				.then( () => setTimeout( this.animationStepForward, 200 ) );
+
+		default:
+			return Promise.resolve();
+		}
 	}
 
 	/**
+	 * Appends the dots of the string's first character to the list of points.
 	 *
+	 * @param	{string} 	character
+	 * @param	{number[]} 	point
+	 * @param	{object}	data.charIndex
 	 */
-	animationStepForward() {
-		if ( this.animationSetup[0] === "running-point" ) {
-			if (
-				!this.state.animation
-				&& this.textLines.length > 0
-				&& this.textLines[0].length > 0
-				&& ( CHARMAP[this.textLines[0][0]] || [] ).length > 0
-			) {
-				this.setState(
-					{ animation: [ 0, 0, 0 ] },
-					() => setTimeout( this.animationStepForward, 200 )
+	printCharacter( character, [ posX, posY ], { charIndex, color } ) {
+		assert( typeof character === "string", "Invalid argument type (charString)" );
+		assert( character.length === 1, "Invalid argument (charString)" );
+		assert( typeof posX === "number", "Invalid argument type (point)" );
+		assert( typeof posY === "number", "Invalid argument type (point)" );
+
+		const dotList = DotMatrixCharacters.getMatrix( character[0] );
+		if ( !Array.isArray( dotList ) ) {
+			return;
+		}
+
+		dotList.forEach( dot => {
+			const [ pointOffsetX, pointOffsetY ] = dot;
+			if ( pointOffsetX !== null && pointOffsetY !== null ) {
+				this.pointsList.append(
+					[ posX + pointOffsetX, posY + pointOffsetY ],
+					{ charIndex, color }
 				);
+			}
+		} );
+	}
+
+	/**
+	 * Check if there is an active animation which shall be advanced, now.
+	 * /
+	animationStepForward() {
+		if ( this.state.animationSetup.length === 0 ) {
+			return Promise.resolve();
+		}
+
+		switch ( this.state.animationSetup[0] ) {
+		case "running-point":
+			return this.animationPointNext( false )
+				.then( () => this.animationLayerRefresh() )
+				.then( () => setTimeout( this.animationStepForward, 200 ) );
+
+		default:
+			return Promise.resolve();
+		}
+	}
+
+	/**
+	 * Selects the first point of the very first character in the text.
+	 * /
+	animationPointFirst( callback ) {
+		return new Promise( resolve => {
+			// eslint-disable-next-line require-jsdoc
+			const resolveWithCallback = () => {
+				if ( typeof callback === "function" ) {
+					callback.call( this );
+				}
+				resolve();
+			};
+
+			if ( this.textLines.length === 0 ) {
+				this.setState(
+					{ animationPoint: null },
+					resolve
+				);
+			} else if ( this.textLines[0].length > 0 && ( CHARMAP[this.textLines[0][0]] || [] ).length > 0 ) {
+				this.setState(
+					{ animationPoint: { line: 0, char: 0, point: 0 } },
+					resolveWithCallback
+				);
+			} else {
+				this.setState(
+					{ animationPoint: null },
+					() => this.animationPointNext( true ).then( resolveWithCallback ),
+				);
+			}
+		} );
+	}
+
+	/**
+	 * Selects the next point in the current character of the text.
+	 *
+	 * If there are no more points in the current character,
+	 * than the first point of the next character will be selected.
+	 *
+	 * @param	{boolean}	stopAtEnd
+	 *		Set to true if the routine shall stop at the last point
+	 *		of the very last character in the text; or
+	 *		Set to false if the routine shall loop back to the start
+	 *		in case that the very last point is reached.
+	 *
+	 * @returns	{null|object}
+	 *		Returns tripel with data of next point; or
+	 *		Returns null if no more point could be selected
+	 * /
+	animationPointNext( stopAtEnd = false, callback = null ) {
+		return new Promise( resolve => {
+			// eslint-disable-next-line require-jsdoc
+			const resolveWithCallback = () => {
+				if ( typeof callback === "function" ) {
+					callback.call( this );
+				}
+				resolve();
+			};
+
+			if ( this.textLines.length === 0 ) {
+				this.setState( { animationPoint: null }, resolve );
 				return;
 			}
 
-			let [ line, char, point ] = this.state.animation || [ 0, 0, 0 ];
+			let { line, char, point } = this.state.animationPoint || { line: 0, char: 0, point: 0 };
 			point++;
+
 			while ( line < this.textLines.length ) {
 				while ( char < this.textLines[line].length ) {
 					const map = CHARMAP[this.textLines[line][char]] || [];
 					if ( point < map.length ) {
-						this.setState(
-							{ animation: [ line, char, point ] },
-							() => setTimeout( this.animationStepForward, 200 )
-						);
+						this.setState( { animation: { line, char, point } }, resolveWithCallback );
 						return;
 					}
 					char++;
@@ -195,97 +279,92 @@ export class Logo extends React.Component {
 				line++;
 				char = 0;
 			}
+
 			this.setState(
-				{ animation: null },
-				() => setTimeout( this.animationStepForward, 200 )
+				{ animationPoint: null },
+				() => {
+					if ( stopAtEnd ) {
+						resolveWithCallback();
+					} else {
+						this.animationPointNext( true ).then( resolveWithCallback );
+					}
+				}
 			);
-			// eslint-disable-next-line no-useless-return
-			return;
-		}
+		} );
 	}
+
+	// animationLayerClear() {
+
+	// }
+
+	// animationLayerSetPoint() {
+
+	// }
 
 	/**
 	 *
 	 * @param {*} line
 	 * @param {*} char
 	 * @param {*} point
-	 */
+	 * /
 	animationPointColor( line, char, point ) {
+		// if (
+		// 	this.animationSetup[0] === "running-point"
+		// 	&& Array.isArray( this.state.animation )
+		// ) {
+		// 	const [ line2, char2, point2 ] = this.state.animation;
+		// 	if (
+		// 		// eslint-disable-next-line no-extra-parens
+		// 		( line === line2 && char === char2 && point === point2 )
+		// 		|| this.textLines[line][char][point] === this.textLines[line2][char2][point2]
+		// 	) {
+		// 		return this.animationSetup[1] || "white";
+		// 	}
+		// }
+
 		if (
-			this.animationSetup[0] === "running-point"
-			&& Array.isArray( this.state.animation )
-			&& this.state.animation[0] === line
-			&& this.state.animation[1] === char
-			&& this.state.animation[2] === point
+			this.state.animationSetup[0] === "running-point"
+			&& this.state.animationPoint !== null
+			&& typeof this.state.animationPoint === "object"
+			&& this.state.animationPoint.line === line
+			&& this.state.animationPoint.char === char
+			&& this.state.animationPoint.point === point
 		) {
-			return this.animationSetup[1] || "white";
+			return this.state.animationSetup[1] || "white";
 		}
 		return null;
-	}
-
-	/**
-	 *
-	 * @param {*} character
-	 */
-	getRectangles( charX, charY ) {
-		const template = CHARMAP[this.textLines[charY][charX]] || [];
-
-		let color = "white";
-		if ( typeof this.props.color === "string" ) {
-			( { color } = this.props );
-		} else if (
-			Array.isArray( this.props.color )
-			&& this.props.color.length > charY
-		) {
-			if ( typeof this.props.color[charY] === "string" ) {
-				color = this.props.color[charY];
-			} else if (
-				Array.isArray( this.props.color[charY] )
-				&& this.props.color[charY].length > charX
-				&& typeof this.props.color[charY][charX] === "string"
-			) {
-				color = this.props.color[charY][charX];
-			}
-		}
-
-		const rectangleList = [];
-		for ( let pointIndex = 0; pointIndex < template.length; pointIndex++ ) {
-			const [ pointX, pointY ] = POINTS[template[pointIndex]];
-			rectangleList.push( <rect key={`${pointY}-${pointX}-${pointIndex}`}
-				x={this.sizes.leftBorder + ( 6 * charX + pointX + 1 ) * this.props.zoom}
-				y={this.sizes.topBorder + ( 6 * charY + pointY + 1 ) * this.props.zoom}
-				width={this.props.zoom}
-				height={this.props.zoom}
-				style={{ fill: this.animationPointColor( charY, charX, pointIndex ) || color }}
-			/> );
-		}
-
-		return rectangleList;
 	}
 
 	/**
 	 * Composing output
 	 */
 	render() {
-		if ( this.sizes.height === 0 || this.sizes.width === 0 ) {
+		if ( !this.imageSizes.height || !this.imageSizes.width ) {
 			return <div className="emptySVG"></div>;
 		}
 
-		const framesList = [];
-		// eslint-disable-next-line id-length
-		for ( let y = 0; y < this.sizes.height; y++ ) {
-			// eslint-disable-next-line id-length
-			for ( let x = 0; x < this.textLines[y].length; x++ ) {
-				framesList.push( this.getRectangles( x, y ) );
+		const rectangleList = [];
+
+		let currDot = this.pointsList.first();
+		while ( currDot ) {
+			if ( currDot.generation === 1 ) {
+				const dotX = this.imageSizes.leftPadding + ( currDot.posX + 1 ) * this.props.zoom;
+				const dotY = this.imageSizes.topPadding + ( currDot.posY + 1 ) * this.props.zoom;
+				const fill = currDot.data.color;
+				rectangleList.push( <rect key={`${dotX}-${dotY}`}
+					x={dotX} y={dotY} width={this.props.zoom} height={this.props.zoom}
+					style={{ fill, strokeWidth: this.props.zoom / 10, stroke: fill }}
+				/> );
 			}
+			currDot = this.pointsList.next();
 		}
 
 		return <svg
-			width={this.sizes.extendX}
-			height={this.sizes.extendY}
+			width={this.imageSizes.width}
+			height={this.imageSizes.height}
 			style={{ backgroundColor: this.props.background || "white" }}
 		>
-			{framesList}
+			{rectangleList}
 		</svg>;
 	}
 }
