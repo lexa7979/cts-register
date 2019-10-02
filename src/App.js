@@ -41,7 +41,7 @@ export class App extends React.Component {
 					color={[ "white", "#8cc63f" ]}
 					zoom={3}
 					ratio={1}
-					animation="running-point:black"
+					animation="running-point:#0099ff"
 				/>
 				<FormRegister />
 				<Logo text="LEXA" background="white" color="lightgreen" zoom={2} animation="running-point:red" />

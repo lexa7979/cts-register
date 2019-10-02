@@ -11,7 +11,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
+    "test": "react-scripts test --reporters=\"jest-spec-reporter\"",
     "test:update": "react-scripts test -u",
     "eject": "react-scripts eject"
   },
@@ -37,6 +37,7 @@
     "eslint": "^6.5.0",
     "eslint-plugin-jest": "^22.17.0",
     "eslint-plugin-react": "^7.14.3",
+    "jest-spec-reporter": "^1.0.8",
     "prettier": "^1.18.2"
   }
 }

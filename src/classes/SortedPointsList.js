@@ -49,7 +49,7 @@ export class SortedPointsList {
 			maxY:  null,
 		};
 
-		this.currentIndex = null;
+		this.currentIndex = {};
 	}
 
 	/**
@@ -65,14 +65,14 @@ export class SortedPointsList {
 		const newIndex = this.itemList.length;
 
 		let generation = 1;
-		while ( this.itemIndex.has( [ posX, posY, generation ] ) ) {
+		while ( this.itemIndex.has( `${posX}-${posY}-${generation}` ) ) { // [ posX, posY, generation ] ) ) {
 			generation++;
 		}
 
 		const item = { posX, posY, generation, data };
 
 		this.itemList.push( item );
-		this.itemIndex.set( [ posX, posY, generation ], newIndex );
+		this.itemIndex.set( `${posX}-${posY}-${generation}`, newIndex ); // [ posX, posY, generation ], newIndex );
 
 		if ( generation === 1 ) {
 			this.itemStats.count++;
@@ -102,11 +102,22 @@ export class SortedPointsList {
 	 *		null if the point wasn't stored, yet.
 	 */
 	get( [ posX, posY ] ) {
-		if ( this.itemIndex.has( [ posX, posY, 1 ] ) ) {
-			const index = this.itemIndex.get( [ posX, posY, 1 ] );
+		if ( this.itemIndex.has( `${posX}-${posY}-1` ) ) { // [ posX, posY, 1 ] ) ) {
+			const index = this.itemIndex.get( `${posX}-${posY}-1` ); // [ posX, posY, 1 ] );
 			return this.itemList[index];
 		}
+
 		return null;
+	}
+
+	/**
+	 * Determines the number of items in the list of points.
+	 *
+	 * @returns	{number}
+	 *		Number of items, e.g. 124
+	 */
+	length() {
+		return this.itemList.length;
 	}
 
 	/**
@@ -122,13 +133,13 @@ export class SortedPointsList {
 	 *			  data: { color: "black" } }; or
 	 *		null if there was no point stored, yet.
 	 */
-	first() {
+	first( iterator = "default" ) {
 		if ( this.itemList.length === 0 ) {
-			this.currentIndex = null;
+			delete this.currentIndex[iterator];
 			return null;
 		}
 
-		this.currentIndex = 0;
+		this.currentIndex[iterator] = 0;
 		return this.itemList[0];
 	}
 
@@ -145,24 +156,14 @@ export class SortedPointsList {
 	 *			  data: { color: "black" } }; or
 	 *		null if there was no point stored, yet.
 	 */
-	last() {
+	last( iterator = "default" ) {
 		if ( this.itemList.length === 0 ) {
-			this.currentIndex = null;
+			delete this.currentIndex[iterator];
 			return null;
 		}
 
-		this.currentIndex = this.itemList.length - 1;
-		return this.itemList[this.currentIndex];
-	}
-
-	/**
-	 * Determines the number of items in the list of points.
-	 *
-	 * @returns	{number}
-	 *		Number of items, e.g. 124
-	 */
-	length() {
-		return this.itemList.length;
+		this.currentIndex[iterator] = this.itemList.length - 1;
+		return this.itemList[this.currentIndex[iterator]];
 	}
 
 	/**
@@ -171,8 +172,8 @@ export class SortedPointsList {
 	 * @returns	{boolean}
 	 *		True iff there is another list-item before the current point
 	 */
-	hasPrev() {
-		return this.currentIndex > 0;
+	hasPrev( iterator = "default" ) {
+		return this.currentIndex[iterator] > 0;
 	}
 
 	/**
@@ -191,36 +192,48 @@ export class SortedPointsList {
 	 *			  data: { color: "black" } }; or
 	 *		null if the previously selected point has no predecessor
 	 */
-	prev() {
-		this.currentIndex = this.currentIndex > 0 ? this.currentIndex - 1 : null;
+	prev( iterator = "default" ) {
+		if ( this.currentIndex[iterator] > 0 ) {
+			this.currentIndex[iterator]--;
+			return this.itemList[this.currentIndex[iterator]];
+		}
 
-		return this.currentIndex === null ? null : this.itemList[this.currentIndex];
+		delete this.currentIndex[iterator];
+		return null;
 	}
 
 	/**
 	 * Checks if the current point has a successor.
 	 */
-	hasNext() {
-		return this.currentIndex !== null && this.currentIndex + 1 < this.itemList.length;
+	hasNext( iterator = "default" ) {
+		return typeof this.currentIndex[iterator] === "number"
+			&& this.currentIndex[iterator] + 1 < this.itemList.length;
 	}
 
 	/**
 	 * Switches to the successor of the current point
 	 * and delivers its information.
 	 */
-	next() {
-		this.currentIndex = this.currentIndex !== null && this.currentIndex + 1 < this.itemList.length
-			? this.currentIndex + 1
-			: null;
+	next( iterator = "default" ) {
+		if (
+			typeof this.currentIndex[iterator] === "number"
+			&& this.currentIndex[iterator] + 1 < this.itemList.length
+		) {
+			this.currentIndex[iterator]++;
+			return this.itemList[this.currentIndex[iterator]];
+		}
 
-		return this.currentIndex === null ? null : this.itemList[this.currentIndex];
+		delete this.currentIndex[iterator];
+		return null;
 	}
 
 	/**
 	 * Delivers the information of the currently selected point.
 	 */
-	current() {
-		return this.currentIndex === null ? null : this.itemList[this.currentIndex];
+	current( iterator = "default" ) {
+		return typeof this.currentIndex[iterator] === "number"
+			? this.itemList[this.currentIndex[iterator]]
+			: null;
 	}
 
 	/**
@@ -237,7 +250,8 @@ export class SortedPointsList {
 	 *		null if the point shall be marked without any additional data.
 	 */
 	setMark( [ posX, posY ], flag = null ) {
-		this.itemTags.set( [ posX, posY ], flag === null ? true : flag );
+		this.itemTags.set( `${posX}-${posY}`, flag === null ? true : flag );
+		// this.itemTags.set( [ posX, posY ], flag === null ? true : flag );
 	}
 
 	/**
@@ -249,8 +263,8 @@ export class SortedPointsList {
 	 *			[ 4, 8 ]
 	 */
 	getMark( [ posX, posY ] ) {
-		return this.itemTags.has( [ posX, posY ] )
-			? this.itemTags.get( [ posX, posY ] )
+		return this.itemTags.has( `${posX}-${posY}` ) // [ posX, posY ] )
+			? this.itemTags.get( `${posX}-${posY}` ) // [ posX, posY ] )
 			: null;
 	}
 
@@ -263,7 +277,7 @@ export class SortedPointsList {
 	 *			[ 4, 8 ]
 	 */
 	unmark( [ posX, posY ] ) {
-		this.itemTags.delete( [ posX, posY ] );
+		this.itemTags.delete( `${posX}-${posY}` ); // [ posX, posY ] );
 	}
 
 	/**
