@@ -1,8 +1,4 @@
 /**
- * @prettier
- */
-
-/**
  * Copyright (c) 2019 <alexander.urban@cygni.se>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -25,9 +21,6 @@
  */
 /* eslint-disable max-lines-per-function */
 
-import path from "path";
-const snapshotDir = path.resolve( __dirname, "__snapshots__" );
-
 import React from "react";
 import ReactDOM from "react-dom";
 
@@ -36,34 +29,58 @@ import { shallow } from "enzyme";
 import Logo from "./Logo";
 
 describe( "Component Logo", () => {
+	describe( "using static supports()", () => {
+		it( "- confirms supported texts", () => {
+			expect( Logo.supports( "" ) ).toBe( true );
+			expect( Logo.supports( "CTS" ) ).toBe( true );
+			expect( Logo.supports( "CTS\nCTS" ) ).toBe( true );
+			expect( Logo.supports( "CTS_\n2020" ) ).toBe( true );
+			expect( Logo.supports( "CTSCTSCTSCTSCTSCTSCTSCTSCTS" ) ).toBe( true );
+		} );
+
+		it( "- denies unsupported texts", () => {
+			expect( Logo.supports( "e" ) ).toBe( false );
+			expect( Logo.supports( "ABCDEFGHIJKLMNOPQRSTUVWXZY" ) ).toBe( false );
+		} );
+	} );
+
 	describe( "when rendering", () => {
 		it( "with no properties - FAILS", () => {
 			const div = document.createElement( "div" );
 			expect( () => {
 				ReactDOM.render( <Logo />, div );
-			} ).toThrowWithSupressedOutput();
+			} ).toSucceedWithMessages();
 			ReactDOM.unmountComponentAtNode( div );
 		} );
 
-		it( "with minimal properties - doesn't crash", () => {
+		it( "with minimal properties - succeeds", () => {
 			const div = document.createElement( "div" );
-			ReactDOM.render( <Logo text="" />, div );
+			expect( () => {
+				ReactDOM.render( <Logo text="" />, div );
+			} ).toSucceedWithoutMessages();
 			ReactDOM.unmountComponentAtNode( div );
 		} );
 
-		it( "with minimal properties - results as expected  (-> check snapshot file)", () => {
-			const component = shallow( <Logo text="" /> );
-			expect( component.length ).toBeGreaterThan( 0 );
-			expect( component ).toMatchSnapshot();
+		it( "with minimal properties - delivers expected result  (-> check snapshot, too)", () => {
+			// eslint-disable-next-line quotes
+			const testString = `<Logo text="" />`;
+			const testElement = <Logo text="" />;
+			const wrapper = shallow( testElement );
+
+			const html = `${wrapper.html()}<br/><br/>${testString.replace( "<", "&lt;" ).replace( ">", "&gt;" )}`;
+
+			return expect( html ).toAsyncMatchNamedHTMLSnapshot( "Logo" );
 		} );
 
 		it( "with example text 'CTS' - doesn't crash", () => {
 			const div = document.createElement( "div" );
-			ReactDOM.render( <Logo text="CTS" />, div );
+			expect( () => {
+				ReactDOM.render( <Logo text="CTS" />, div );
+			} ).toSucceedWithoutMessages();
 			ReactDOM.unmountComponentAtNode( div );
 		} );
 
-		it( "with example text 'CTS' - results as expected  (-> check HTML file)", () => {
+		it( "with example text 'CTS' - delivers expected result  (-> check snapshot, too)", () => {
 			// eslint-disable-next-line quotes
 			const testString = `<Logo text="CTS" />`;
 			const testElement = <Logo text="CTS" />;
@@ -71,21 +88,21 @@ describe( "Component Logo", () => {
 
 			const html = `${wrapper.html()}<br/><br/>${testString.replace( "<", "&lt;" ).replace( ">", "&gt;" )}`;
 
-			return expect( html ).toMatchNamedHTMLSnapshot( `${snapshotDir}/Logo-CTS.html` );
+			return expect( html ).toAsyncMatchNamedHTMLSnapshot( "Logo-CTS" );
 		} );
 
-		it( "with styled text 'CTS' - results as expected  (-> check HTML file)", () => {
+		it( "with styled text 'CTS' - delivers expected result  (-> check snapshot, too)", () => {
 			// eslint-disable-next-line quotes
-			const testString = `<Logo text="CTS" background="black" color="white" />`;
-			const testElement = <Logo text="CTS" background="black" color="white" />;
+			const testString = `<Logo text={"CTS\\n2020"} background="black" color="red" />`;
+			const testElement = <Logo text={"CTS\n2020"} background="black" color="red" />;
 			const wrapper = shallow( testElement );
 
 			const html = `${wrapper.html()}<br/><br/>${testString.replace( "<", "&lt;" ).replace( ">", "&gt;" )}`;
 
-			return expect( html ).toMatchNamedHTMLSnapshot( `${snapshotDir}/Logo-CTS-styled.html` );
+			return expect( html ).toAsyncMatchNamedHTMLSnapshot( "Logo-CTS-styled" );
 		} );
 
-		it( "with styled text 'CTS' and zoom - results as expected  (-> check HTML file)", () => {
+		it( "with styled text 'CTS' and zoom - delivers expected result  (-> check snapshot, too)", () => {
 			// eslint-disable-next-line quotes
 			const testString = `<Logo text="CTS" background="black" color="white" zoom={5} />`;
 			const testElement = <Logo text="CTS" background="black" color="white" zoom={5} />;
@@ -93,10 +110,10 @@ describe( "Component Logo", () => {
 
 			const html = `${wrapper.html()}<br/><br/>${testString.replace( "<", "&lt;" ).replace( ">", "&gt;" )}`;
 
-			return expect( html ).toMatchNamedHTMLSnapshot( `${snapshotDir}/Logo-CTS-styled-zoom.html` );
+			return expect( html ).toAsyncMatchNamedHTMLSnapshot( "Logo-CTS-styled-zoom" );
 		} );
 
-		it( "with styled text 'CTS' and ratio - results as expected  (-> check HTML file)", () => {
+		it( "with styled text 'CTS' and ratio - delivers expected result  (-> check snapshot, too)", () => {
 			// eslint-disable-next-line quotes
 			const testString = `<Logo text="CTS" background="black" color="white" ratio={1} />`;
 			const testElement = <Logo text="CTS" background="black" color="white" ratio={1} />;
@@ -104,31 +121,18 @@ describe( "Component Logo", () => {
 
 			const html = `${wrapper.html()}<br/><br/>${testString.replace( "<", "&lt;" ).replace( ">", "&gt;" )}`;
 
-			return expect( html ).toMatchNamedHTMLSnapshot( `${snapshotDir}/Logo-CTS-styled-ratio.html` );
+			return expect( html ).toAsyncMatchNamedHTMLSnapshot( "Logo-CTS-styled-ratio" );
 		} );
 
-		it( "with styled text 'CTS', zoom and ratio - results as expected  (-> check SVG file)", () => {
+		it( "with styled text 'CTS', zoom and ratio - delivers expected result  (-> check snapshot, too)", () => {
 			// eslint-disable-next-line quotes
-			const testString = `<Logo text="CTS" background="black" color="white" zoom={5} ratio={1} />`;
-			const testElement = <Logo text="CTS" background="yellow" color="red" zoom={5} ratio={1} />;
+			const testString = `<Logo text={"C\\nT\\nS"} background="yellow" color="brown" zoom={5} ratio={1} />`;
+			const testElement = <Logo text={"C\nT\nS"} background="yellow" color="brown" zoom={5} ratio={1} />;
 			const wrapper = shallow( testElement );
 
 			const html = `${wrapper.html()}<br/><br/>${testString.replace( "<", "&lt;" ).replace( ">", "&gt;" )}`;
 
-			return expect( html ).toMatchNamedSnapshot( `${snapshotDir}/Logo-CTS-styled-zoom-ratio.html` );
-		} );
-	} );
-
-	describe( "with static supports()", () => {
-		it( "can determine supported texts", () => {
-			expect( Logo.supports( "" ) ).toBe( true );
-			expect( Logo.supports( "CTS" ) ).toBe( true );
-			expect( Logo.supports( "CTS\nCTS" ) ).toBe( true );
-			expect( Logo.supports( "CTS_\n2020" ) ).toBe( true );
-			expect( Logo.supports( "CTSCTSCTSCTSCTSCTSCTSCTSCTS" ) ).toBe( true );
-
-			expect( Logo.supports( "e" ) ).toBe( false );
-			expect( Logo.supports( "ABCDEFGHIJKLMNOPQRSTUVWXZY" ) ).toBe( false );
+			return expect( html ).toAsyncMatchNamedHTMLSnapshot( "Logo-CTS-styled-zoom-ratio" );
 		} );
 	} );
 } );

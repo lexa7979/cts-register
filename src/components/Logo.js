@@ -79,6 +79,10 @@ export class Logo extends React.Component {
 	constructor( props ) {	// eslint-disable-line max-lines-per-function, max-statements
 		super( props );
 
+		if ( typeof this.props.text !== "string" ) {
+			return;
+		}
+
 		this.textLines = this.props.text.split( /\r?\n/ );
 
 		this.textWidth = this.textLines.reduce( ( maxLen, line ) => Math.max( maxLen, line.length ), 0 );
@@ -92,12 +96,12 @@ export class Logo extends React.Component {
 		this.pointsList = new SortedPointsList();
 		let allCharIndex = 0;
 		this.textLines.forEach( ( textline, lineIndex ) => {
-			const lineStart = Math.floor( ( this.textWidth - textline.length ) / 2 );
+			const lineStart = ( this.textWidth - textline.length ) / 2;
 			const posY = 6 * lineIndex;
 			const color = this.colorList[lineIndex];
 			for ( let charPos = 0; charPos < textline.length; charPos++ ) {
 				const character = textline[charPos];
-				const posX = 6 * ( lineStart + charPos );
+				const posX = Math.floor( 6 * ( lineStart + charPos ) );
 				this.printCharacter( character, [ posX, posY ], { allCharIndex: allCharIndex++, color } );
 			}
 		} );
@@ -177,19 +181,25 @@ export class Logo extends React.Component {
 		let currDot = this.pointsList.first();
 		while ( currDot ) {
 			if ( currDot.generation === 1 ) {
-				const dotX = this.imageSizes.leftPadding + ( currDot.posX + 1 ) * this.props.zoom;
-				const dotY = this.imageSizes.topPadding + ( currDot.posY + 1 ) * this.props.zoom;
+				const dotX = this.imageSizes.leftPadding + ( ( currDot.posX + 1 ) * this.props.zoom );
+				const dotY = this.imageSizes.topPadding + ( ( currDot.posY + 1 ) * this.props.zoom );
 				const mark = this.pointsList.getMark( [ currDot.posX, currDot.posY ] );
 				if ( mark === null ) {
 					const fill = currDot.data.color;
 					rectangleList.push( <rect key={`${dotX}-${dotY}`}
-						x={dotX} y={dotY} width={this.props.zoom} height={this.props.zoom}
+						x={dotX}
+						y={dotY}
+						width={this.props.zoom}
+						height={this.props.zoom}
 						style={{ fill, strokeWidth: this.props.zoom / 10, stroke: fill }}
 					/> );
 				} else if ( typeof mark === "object" && mark.color ) {
 					const fill = mark.color;
 					rectangleList.push( <rect key={`${dotX}-${dotY}`}
-						x={dotX} y={dotY} width={this.props.zoom} height={this.props.zoom}
+						x={dotX}
+						y={dotY}
+						width={this.props.zoom}
+						height={this.props.zoom}
 						style={{ fill, strokeWidth: this.props.zoom / 10, stroke: fill }}
 					/> );
 				}

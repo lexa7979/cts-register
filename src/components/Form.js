@@ -20,6 +20,8 @@
  * SOFTWARE.
  */
 
+import assert from "assert";
+
 import React from "react";
 import PropTypes from "prop-types";
 
@@ -49,6 +51,14 @@ export class Form extends React.Component {
 	// eslint-disable-next-line require-jsdoc
 	constructor( props ) {
 		super( props );
+
+		if (
+			this.props.fields === null
+			|| typeof this.props.fields !== "object"
+			|| typeof this.props.handleSubmit !== "function"
+		) {
+			return;
+		}
 
 		this.state = {
 			inputValues: {},
@@ -80,6 +90,10 @@ export class Form extends React.Component {
 	 * @param	{object} 	inputComponent
 	 */
 	labelBoxingGenerator( inputName, label, inputComponent ) {	// eslint-disable-line class-methods-use-this
+		assert( typeof inputName === "string" && inputName !== "", "Invalid argument" );
+		assert( label == null || ( typeof label === "string" && label !== "" ), "Invalid argument" );
+		assert( inputComponent != null && typeof inputComponent === "object", "Missing argument" );
+
 		if ( label ) {
 			return <div className="field labeled" key={inputName}>
 				<label htmlFor={inputName}>{label}</label>
@@ -88,7 +102,7 @@ export class Form extends React.Component {
 		}
 
 		return <div className="field unlabeled" key={inputName}>
-			<div></div>
+			<div className="nolabel"></div>
 			{inputComponent}
 		</div>;
 	}
@@ -99,6 +113,8 @@ export class Form extends React.Component {
 	 * @param	{object}	data
 	 */
 	inputFieldGenerator( data ) {
+		assert( data !== null && typeof data === "object", "Invalid argument" );
+
 		return this.labelBoxingGenerator(
 			data.name,
 			data.label,
@@ -118,6 +134,8 @@ export class Form extends React.Component {
 	 * @param	{object}	data
 	 */
 	textareaFieldGenerator( data ) {
+		assert( data !== null && typeof data === "object", "Invalid argument" );
+
 		return this.labelBoxingGenerator(
 			data.name,
 			data.label,
@@ -138,6 +156,8 @@ export class Form extends React.Component {
 	 * @param	{object}	data
 	 */
 	selectFieldGenerator( data ) {
+		assert( data !== null && typeof data === "object", "Invalid argument" );
+
 		return this.labelBoxingGenerator(
 			data.name,
 			data.label,
@@ -151,6 +171,8 @@ export class Form extends React.Component {
 	 * @param {*} data
 	 */
 	checkboxFieldGenerator( data ) {
+		assert( data !== null && typeof data === "object", "Invalid argument" );
+
 		return this.labelBoxingGenerator(
 			data.name,
 			data.label,
@@ -164,6 +186,8 @@ export class Form extends React.Component {
 	 * @param {*} data
 	 */
 	static hiddenFieldGenerator( data ) {
+		assert( data !== null && typeof data === "object", "Invalid argument" );
+
 		return <input type="hidden" key={data.name} name={data.name} value={data.value} />;
 	}
 
@@ -193,6 +217,10 @@ export class Form extends React.Component {
 
 	// eslint-disable-next-line require-jsdoc
 	render() {
+		if ( this.fieldList === null || typeof this.fieldList !== "object" ) {
+			return <div className="empty-form"></div>;
+		}
+
 		const formFields = [];
 		for ( const name in this.fieldList ) {	// eslint-disable-line guard-for-in
 			const data = this.fieldList[name];

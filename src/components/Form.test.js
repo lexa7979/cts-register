@@ -23,12 +23,38 @@
 import React from "react";
 import ReactDOM from "react-dom";
 
+import { shallow } from "enzyme";
+
 import Form from "./Form";
 
-describe( "Abstract component Form", () => {
-	it( "renders without crashing, when minimal properties are given", () => {
-		const div = document.createElement( "div" );
-		ReactDOM.render( <Form fields={{}} handleSubmit={() => {}} />, div );
-		ReactDOM.unmountComponentAtNode( div );
+describe( "Helper component Form", () => {
+	describe( "when rendering", () => {
+		it( "with no properties - FAILS", () => {
+			const div = document.createElement( "div" );
+			expect( () => {
+				ReactDOM.render( <Form />, div );
+			} ).toSucceedWithMessages();
+			ReactDOM.unmountComponentAtNode( div );
+		} );
+
+		it( "with minimal properties - succeeds", () => {
+			const div = document.createElement( "div" );
+			expect( () => {
+				ReactDOM.render( <Form fields={{}} handleSubmit={() => null} />, div );
+			} ).toSucceedWithoutMessages();
+			ReactDOM.unmountComponentAtNode( div );
+		} );
+
+		it( "with minimal properties - delivers expected result  (-> check snapshot file)", () => {
+			const component = shallow( <Form fields={{}} handleSubmit={() => null} /> );
+			expect( component.exists() ).toBe( true );
+			return expect( component.html() ).toAsyncMatchNamedHTMLSnapshot( "Form" );
+		} );
+
+		it( "with one input field - delivers expected result  (-> check snapshot file)", () => {
+			const component = shallow( <Form fields={{ text: { type: "input" } }} handleSubmit={() => null} /> );
+			expect( component.exists() ).toBe( true );
+			return expect( component.html() ).toAsyncMatchNamedHTMLSnapshot( "Form-input" );
+		} );
 	} );
 } );

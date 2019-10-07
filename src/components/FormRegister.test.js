@@ -23,12 +23,27 @@
 import React from "react";
 import ReactDOM from "react-dom";
 
+import { shallow } from "enzyme";
+
 import FormRegister from "./FormRegister";
 
 describe( "Component FormRegister", () => {
-	it( "renders without crashing when no properties are given", () => {
-		const div = document.createElement( "div" );
-		ReactDOM.render( <FormRegister />, div );
-		ReactDOM.unmountComponentAtNode( div );
+	describe( "when rendering", () => {
+		it( "with no properties - succeeds", () => {
+			const div = document.createElement( "div" );
+			ReactDOM.render( <FormRegister />, div );
+			ReactDOM.unmountComponentAtNode( div );
+		} );
+
+		it( "with no properties - delivers expected result  (-> check snapshot, too)", () => {
+			// eslint-disable-next-line quotes
+			const testString = `<FormRegister />`;
+			const testElement = <FormRegister />;
+			const wrapper = shallow( testElement );
+
+			const html = `${wrapper.html()}<br/><br/>${testString.replace( "<", "&lt;" ).replace( ">", "&gt;" )}`;
+
+			return expect( html ).toAsyncMatchNamedHTMLSnapshot( "FormRegister" );
+		} );
 	} );
 } );
