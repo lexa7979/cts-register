@@ -91,7 +91,7 @@ describe( "Component Logo", () => {
 			return expect( html ).toAsyncMatchNamedHTMLSnapshot( "Logo-CTS" );
 		} );
 
-		it( "with styled text 'CTS' - delivers expected result  (-> check snapshot, too)", () => {
+		it( "with two lines text 'CTS 2020' - delivers expected result  (-> check snapshot, too)", () => {
 			// eslint-disable-next-line quotes
 			const testString = `<Logo text={"CTS\\n2020"} background="black" color="red" />`;
 			const testElement = <Logo text={"CTS\n2020"} background="black" color="red" />;
@@ -99,7 +99,18 @@ describe( "Component Logo", () => {
 
 			const html = `${wrapper.html()}<br/><br/>${testString.replace( "<", "&lt;" ).replace( ">", "&gt;" )}`;
 
-			return expect( html ).toAsyncMatchNamedHTMLSnapshot( "Logo-CTS-styled" );
+			return expect( html ).toAsyncMatchNamedHTMLSnapshot( "Logo-CTS2020" );
+		} );
+
+		it( "with styled text 'CTS 2020' - delivers expected result  (-> check snapshot, too)", () => {
+			// eslint-disable-next-line quotes
+			const testString = `<Logo text={"CTS\\n2020"} background="black" color={[ "white", "green" ]} />`;
+			const testElement = <Logo text={"CTS\n2020"} background="black" color={[ "white", "green" ]} />;
+			const wrapper = shallow( testElement );
+
+			const html = `${wrapper.html()}<br/><br/>${testString.replace( "<", "&lt;" ).replace( ">", "&gt;" )}`;
+
+			return expect( html ).toAsyncMatchNamedHTMLSnapshot( "Logo-CTS2020-styled" );
 		} );
 
 		it( "with styled text 'CTS' and zoom - delivers expected result  (-> check snapshot, too)", () => {
