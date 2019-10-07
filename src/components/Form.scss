@@ -1,0 +1,49 @@
+@import "../mixins";
+
+.form {
+	@include flex( column, $horizontal: center );
+
+	.fields {
+		box-sizing: border-box;
+		width: 100%;
+		padding: 5px;
+
+		display: grid;
+		grid-template-columns: 50% 50%;
+		grid-gap: 5px 0px;
+
+		.label {
+			box-sizing: border-box;
+			padding-right: 5px;
+
+			justify-self: end;
+			align-self: center;
+
+			font-size: 0.8em;
+			font-weight: bold;
+		}
+
+		.field {
+			box-sizing: border-box;
+			width: 100%;
+
+			justify-self: start;
+			align-self: center;
+		}
+
+		.field.input {
+			padding: 2px;
+			border: 1px solid #ccc;
+
+			font-size: 1em;
+		}
+
+		.field.radio {
+			@include flex( row, wrap );
+		}
+	}
+
+	.final {
+		padding: 5px;
+	}
+}

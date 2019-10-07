@@ -36,9 +36,9 @@ export class App extends React.Component {
 			<div className="app">
 				{/* <h1>Cygni Tech Summit 2020</h1> */}
 				<Logo
-					text={"CTS\n2020"}
+					text={"CYGNI\nTECH\nSUMMIT\n 2020_"}
 					background="#323232"
-					color={[ "white", "#8cc63f" ]}
+					color={[ "white", "white", "white", "#8cc63f" ]}
 					zoom={3}
 					ratio={1}
 					animation="running-point:#0099ff"

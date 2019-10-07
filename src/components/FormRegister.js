@@ -36,7 +36,29 @@ export class FormRegister extends React.Component {
 		super( props );
 
 		this.formFields = {
-			firstname: { type: "input", label: "Firstname:", placeholder: "Type in your firstname?" },
+			firstname: {
+				type:        "input",
+				label:       "Firstname:",
+				placeholder: "Type in your firstname.",
+				required:    true,
+				focus:       true,
+			},
+			lastname: {
+				type:        "input",
+				label:       "Lastname:",
+				placeholder: "Type in your lastname.",
+				required:    true,
+			},
+			participate: {
+				type:        "radio",
+				label:       "Will you attend the conference?",
+				options:     [ "yes", "no", "maybe" ],
+				required:    true,
+			},
+			submit: {
+				type:        "submit",
+				label:       "",
+			},
 		};
 
 		// eslint-disable-next-line no-console

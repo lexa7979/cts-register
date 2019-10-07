@@ -1,0 +1,62 @@
+/**
+ * Wrapper for display: flex
+ *
+ * @param	$direction
+ *		- row
+ *		- column
+ * @param	$mode
+ *		- nowrap
+ *		- wrap
+ *		- center
+ * @param	$horizontal
+ *		- flex-start
+ *		- flex-end
+ *		- center
+ *		only with "$direction: row":
+ *			- space-between
+ *			- space-around
+ *			- space-evenly
+ *		only with "$direction: column":
+ *			- stretch
+ *			- baseline
+ * @param	$vertical
+ *		- flex-start
+ *		- flex-end
+ *		- center
+ *		only with "$direction: row":
+ *			- stretch
+ *			- baseline
+ *		only with "$direction: column":
+ *			- space-between
+ *			- space-around
+ *			- space-evenly
+ */
+ @mixin flex($direction, $mode: nowrap, $horizontal: flex-start, $vertical: stretch) {
+	display: flex;
+
+	@if $mode == center {
+		flex-flow: $direction nowrap;
+		justify-content: center;
+		align-items: center;
+	} @else if $mode == wrap {
+		flex-flow: $direction wrap;
+		@if $direction == row {
+			justify-content: $horizontal;
+			align-items: center;
+			align-content: $vertical;
+		} @else {
+			justify-content: $vertical;
+			align-items: center;
+			align-content: $horizontal;
+		}
+	} @else {
+		flex-flow: $direction nowrap;
+		@if $direction == row {
+			justify-content: $horizontal;
+			align-items: $vertical;
+		} @else {
+			justify-content: $vertical;
+			align-items: $horizontal;
+		}
+	}
+}

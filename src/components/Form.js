@@ -25,6 +25,8 @@ import assert from "assert";
 import React from "react";
 import PropTypes from "prop-types";
 
+import "./Form.scss";
+
 const propTypes = {
 	formClass:    PropTypes.string,
 	fields:       PropTypes.object.isRequired,
@@ -45,7 +47,9 @@ const defaultProps = {};
  *	 			comments: { type: "textarea", placeholder: "Any comments?", rows: 3 }
  *		- "select"
  *		- "checkbox"
+ *		- "radio"
  *		- "hidden"
+ *		- "submit"
  */
 export class Form extends React.Component {
 	// eslint-disable-next-line require-jsdoc
@@ -69,7 +73,10 @@ export class Form extends React.Component {
 		for ( const name in fields ) {
 			if ( typeof name === "string" && name !== "" ) {
 				const { type = "input", value = "" } = fields[name];
-				if ( typeof this[`${type}FieldGenerator`] !== "function" ) {
+				if (
+					typeof this[`${type}FieldGenerator`] !== "function"
+					&& typeof Form[`${type}FieldGenerator`] !== "function"
+				) {
 					throw new Error( `Unsupported field type "${type}" (${name})` );
 				}
 				this.fieldList[name] = { ...fields[name], name, type };
@@ -87,108 +94,139 @@ export class Form extends React.Component {
 	 *
 	 * @param	{string} 	inputName
 	 * @param	{null|string} 	label
-	 * @param	{object} 	inputComponent
+	 * @param	{null|string}	cssClasses
 	 */
-	labelBoxingGenerator( inputName, label, inputComponent ) {	// eslint-disable-line class-methods-use-this
+	static labelGenerator( inputName, label, cssClasses ) {
 		assert( typeof inputName === "string" && inputName !== "", "Invalid argument" );
 		assert( label == null || ( typeof label === "string" && label !== "" ), "Invalid argument" );
-		assert( inputComponent != null && typeof inputComponent === "object", "Missing argument" );
+		assert( cssClasses == null || typeof cssClasses === "string", "Invliad argument" );
 
 		if ( label ) {
-			return <div className="field labeled" key={inputName}>
-				<label htmlFor={inputName}>{label}</label>
-				{inputComponent}
-			</div>;
+			return <label key={`${inputName}-label`}
+				className={`label ${cssClasses || ""}`}
+				htmlFor={inputName}
+			>{label}</label>;
 		}
 
-		return <div className="field unlabeled" key={inputName}>
-			<div className="nolabel"></div>
-			{inputComponent}
-		</div>;
+		return <div key={`${inputName}-nolabel`}
+			className={`nolabel ${cssClasses || ""}`}
+		></div>;
 	}
 
 	/**
 	 * Delivers the components for a new text field.
 	 *
-	 * @param	{object}	data
+	 * @param	{null|string}	data.label
+	 * @param	{string}	data.name
+	 * @param	{null|string}	data.value
+	 * @param	{null|string}	data.placeholder
 	 */
 	inputFieldGenerator( data ) {
 		assert( data !== null && typeof data === "object", "Invalid argument" );
 
-		return this.labelBoxingGenerator(
-			data.name,
-			data.label,
-			<input
-				name={data.name}
-				type="text"
-				value={this.state.inputValues[data.name]}
-				placeholder={data.placeholder || null}
-				onChange={this.handleInputChange}
-			/>
-		);
+		return <input key={data.name}
+			name={data.name}
+			type="text"
+			value={this.state.inputValues[data.name]}
+			placeholder={data.placeholder || null}
+			className="field input"
+			onChange={this.handleInputChange}
+		/>;
 	}
 
 	/**
 	 * Delivers the components for a new multiline text field.
 	 *
-	 * @param	{object}	data
+	 * @param	{null|string}	data.label
+	 * @param	{string}	data.name
+	 * @param	{null|string}	data.value
+	 * @param	{null|string}	data.placeholder
+	 * @param	{null|number}	data.cols
+	 * @param	{null|number}	data.rows
 	 */
 	textareaFieldGenerator( data ) {
 		assert( data !== null && typeof data === "object", "Invalid argument" );
 
-		return this.labelBoxingGenerator(
-			data.name,
-			data.label,
-			<textarea
-				name={data.name}
-				value={this.state.inputValues[data.name] || ""}
-				cols={data.cols || null}
-				rows={data.rows || null}
-				placeholder={data.placeholder || null}
-				onChange={this.handleInputChange}
-			/>
-		);
+		return <textarea key={data.name}
+			name={data.name}
+			value={this.state.inputValues[data.name] || ""}
+			placeholder={data.placeholder || null}
+			cols={data.cols || null}
+			rows={data.rows || null}
+			className="field textarea"
+			onChange={this.handleInputChange}
+		/>;
 	}
 
 	/**
 	 * Delivers the components for a new select box.
 	 *
 	 * @param	{object}	data
-	 */
+	 * /
 	selectFieldGenerator( data ) {
 		assert( data !== null && typeof data === "object", "Invalid argument" );
-
-		return this.labelBoxingGenerator(
-			data.name,
-			data.label,
-			<div></div>
-		);
 	}
 
 	/**
 	 * Delivers the components for a new checkbox field.
 	 *
 	 * @param {*} data
-	 */
+	 * /
 	checkboxFieldGenerator( data ) {
 		assert( data !== null && typeof data === "object", "Invalid argument" );
+	}
 
-		return this.labelBoxingGenerator(
-			data.name,
-			data.label,
-			<div></div>
-		);
+	/**
+	 * Delivers the components for a new group of radio buttons.
+	 *
+	 * @param	{*}	data
+	 */
+	radioFieldGenerator( data ) {
+		assert( data !== null && typeof data === "object", "Invalid argument" );
+
+		const buttonList = [];
+		for ( let index = 0; index < data.options.length; index++ ) {
+			const id = `${data.name}-radio-${index + 1}`;
+			buttonList.push( <div key={id}>
+				<input
+					type="radio"
+					id={id}
+					name={data.name}
+					value={data.options[index]}
+					onChange={this.handleInputChange}
+				/>
+				<label htmlFor={id}>{data.options[index]}</label>
+			</div> );
+		}
+
+		return <div key={data.name} className="field radio">{buttonList}</div>;
 	}
 
 	/**
 	 * Delivers the components for a new hidden field.
 	 *
-	 * @param {*} data
-	 */
-	static hiddenFieldGenerator( data ) {
+	 * @param	{*}	data
+	 * /
+	hiddenFieldGenerator( data ) {
 		assert( data !== null && typeof data === "object", "Invalid argument" );
 
 		return <input type="hidden" key={data.name} name={data.name} value={data.value} />;
+	}
+
+	/**
+	 * Delivers the component for a new submit button.
+	 *
+	 * @param	{*}	data
+	 */
+	static submitFieldGenerator( data ) {
+		assert( data !== null && typeof data === "object", "Invalid argument" );
+
+		return <input key={data.name || "submit"}
+			type="submit"
+			name={data.name || null}
+			value={ data.value || "Submit" }
+			className="field submit"
+		/>;
 	}
 
 	/**
@@ -222,9 +260,22 @@ export class Form extends React.Component {
 		}
 
 		const formFields = [];
+		const submitFields = [];
 		for ( const name in this.fieldList ) {	// eslint-disable-line guard-for-in
 			const data = this.fieldList[name];
-			formFields.push( this[`${data.type}FieldGenerator`]( data ) );
+			if ( data.type === "submit" ) {
+				submitFields.push( Form.submitFieldGenerator( data ) );
+			} else if ( typeof this[`${data.type}FieldGenerator`] === "function" ) {
+				formFields.push( Form.labelGenerator( data.name, data.label, data.type ) );
+				formFields.push( this[`${data.type}FieldGenerator`]( data ) );
+			} else {
+				formFields.push( Form.labelGenerator( data.name, data.label, data.type ) );
+				formFields.push( Form[`${data.type}FieldGenerator`]( data ) );
+			}
+		}
+
+		if ( submitFields.length === 0 ) {
+			submitFields.push( Form.submitFieldGenerator( { value: "Submit" } ) );
 		}
 
 		return <form
@@ -235,7 +286,7 @@ export class Form extends React.Component {
 				{formFields}
 			</div>
 			<div className="final">
-				<input className="submit" type="submit" value="Submit" />
+				{submitFields}
 			</div>
 		</form>;
 	}
