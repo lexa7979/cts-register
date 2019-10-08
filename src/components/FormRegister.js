@@ -1,4 +1,6 @@
 /**
+ * MIT License
+ *
  * Copyright (c) 2019 <alexander.urban@cygni.se>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -31,7 +33,9 @@ const defaultProps = {};
  * Component which will be used by users to register for the event.
  */
 export class FormRegister extends React.Component {
-	// eslint-disable-next-line require-jsdoc
+	/**
+	 * Initialising component
+	 */
 	constructor( props ) {
 		super( props );
 
@@ -65,7 +69,9 @@ export class FormRegister extends React.Component {
 		this.handleSubmit = inputData => console.log( "Form was submitted", inputData );
 	}
 
-	// eslint-disable-next-line require-jsdoc
+	/**
+	 * Composing output
+	 */
 	render() {
 		return <Form formClass="register" fields={this.formFields} handleSubmit={this.handleSubmit} />;
 	}

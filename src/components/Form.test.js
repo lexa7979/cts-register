@@ -1,6 +1,6 @@
-/* eslint-disable max-len */
-/* eslint-disable max-lines-per-function */
 /**
+ * MIT License
+ *
  * Copyright (c) 2019 <alexander.urban@cygni.se>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,6 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+/* eslint-disable max-len,max-lines-per-function */
 
 import React from "react";
 import ReactDOM from "react-dom";
