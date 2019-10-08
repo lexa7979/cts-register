@@ -65,14 +65,16 @@ describe( "Component Logo", () => {
 			// eslint-disable-next-line quotes
 			const testString = `<Logo text="" />`;
 			const testElement = <Logo text="" />;
-			const wrapper = shallow( testElement );
+			const filename = "Logo";
 
-			const html = `${wrapper.html()}<br/><br/>${testString.replace( "<", "&lt;" ).replace( ">", "&gt;" )}`;
+			const component = shallow( testElement );
+			expect( component.exists() ).toBe( true );
 
-			return expect( html ).toAsyncMatchNamedHTMLSnapshot( "Logo" );
+			const html = `${component.html()}<br/><br/>${testString.replace( "<", "&lt;" ).replace( ">", "&gt;" )}`;
+			return expect( html ).toAsyncMatchNamedHTMLSnapshot( filename );
 		} );
 
-		it( "with example text 'CTS' - doesn't crash", () => {
+		it( "with example text 'CTS' - succeeds", () => {
 			const div = document.createElement( "div" );
 			expect( () => {
 				ReactDOM.render( <Logo text="CTS" />, div );
@@ -84,66 +86,78 @@ describe( "Component Logo", () => {
 			// eslint-disable-next-line quotes
 			const testString = `<Logo text="CTS" />`;
 			const testElement = <Logo text="CTS" />;
-			const wrapper = shallow( testElement );
+			const filename = "Logo-CTS";
 
-			const html = `${wrapper.html()}<br/><br/>${testString.replace( "<", "&lt;" ).replace( ">", "&gt;" )}`;
+			const component = shallow( testElement );
+			expect( component.exists() ).toBe( true );
 
-			return expect( html ).toAsyncMatchNamedHTMLSnapshot( "Logo-CTS" );
+			const html = `${component.html()}<br/><br/>${testString.replace( "<", "&lt;" ).replace( ">", "&gt;" )}`;
+			return expect( html ).toAsyncMatchNamedHTMLSnapshot( filename );
 		} );
 
 		it( "with two lines text 'CTS 2020' - delivers expected result  (-> check snapshot, too)", () => {
 			// eslint-disable-next-line quotes
 			const testString = `<Logo text={"CTS\\n2020"} background="black" color="red" />`;
 			const testElement = <Logo text={"CTS\n2020"} background="black" color="red" />;
-			const wrapper = shallow( testElement );
+			const filename = "Logo-CTS2020";
 
-			const html = `${wrapper.html()}<br/><br/>${testString.replace( "<", "&lt;" ).replace( ">", "&gt;" )}`;
+			const component = shallow( testElement );
+			expect( component.exists() ).toBe( true );
 
-			return expect( html ).toAsyncMatchNamedHTMLSnapshot( "Logo-CTS2020" );
+			const html = `${component.html()}<br/><br/>${testString.replace( "<", "&lt;" ).replace( ">", "&gt;" )}`;
+			return expect( html ).toAsyncMatchNamedHTMLSnapshot( filename );
 		} );
 
 		it( "with styled text 'CTS 2020' - delivers expected result  (-> check snapshot, too)", () => {
 			// eslint-disable-next-line quotes
 			const testString = `<Logo text={"CTS\\n2020"} background="black" color={[ "white", "green" ]} />`;
 			const testElement = <Logo text={"CTS\n2020"} background="black" color={[ "white", "green" ]} />;
-			const wrapper = shallow( testElement );
+			const filename = "Logo-CTS2020-styled";
 
-			const html = `${wrapper.html()}<br/><br/>${testString.replace( "<", "&lt;" ).replace( ">", "&gt;" )}`;
+			const component = shallow( testElement );
+			expect( component.exists() ).toBe( true );
 
-			return expect( html ).toAsyncMatchNamedHTMLSnapshot( "Logo-CTS2020-styled" );
+			const html = `${component.html()}<br/><br/>${testString.replace( "<", "&lt;" ).replace( ">", "&gt;" )}`;
+			return expect( html ).toAsyncMatchNamedHTMLSnapshot( filename );
 		} );
 
 		it( "with styled text 'CTS' and zoom - delivers expected result  (-> check snapshot, too)", () => {
 			// eslint-disable-next-line quotes
 			const testString = `<Logo text="CTS" background="black" color="white" zoom={5} />`;
 			const testElement = <Logo text="CTS" background="black" color="white" zoom={5} />;
-			const wrapper = shallow( testElement );
+			const filename = "Logo-CTS-styled-zoom";
 
-			const html = `${wrapper.html()}<br/><br/>${testString.replace( "<", "&lt;" ).replace( ">", "&gt;" )}`;
+			const component = shallow( testElement );
+			expect( component.exists() ).toBe( true );
 
-			return expect( html ).toAsyncMatchNamedHTMLSnapshot( "Logo-CTS-styled-zoom" );
+			const html = `${component.html()}<br/><br/>${testString.replace( "<", "&lt;" ).replace( ">", "&gt;" )}`;
+			return expect( html ).toAsyncMatchNamedHTMLSnapshot( filename );
 		} );
 
 		it( "with styled text 'CTS' and ratio - delivers expected result  (-> check snapshot, too)", () => {
 			// eslint-disable-next-line quotes
 			const testString = `<Logo text="CTS" background="black" color="white" ratio={1} />`;
 			const testElement = <Logo text="CTS" background="black" color="white" ratio={1} />;
-			const wrapper = shallow( testElement );
+			const filename = "Logo-CTS-styled-ratio";
 
-			const html = `${wrapper.html()}<br/><br/>${testString.replace( "<", "&lt;" ).replace( ">", "&gt;" )}`;
+			const component = shallow( testElement );
+			expect( component.exists() ).toBe( true );
 
-			return expect( html ).toAsyncMatchNamedHTMLSnapshot( "Logo-CTS-styled-ratio" );
+			const html = `${component.html()}<br/><br/>${testString.replace( "<", "&lt;" ).replace( ">", "&gt;" )}`;
+			return expect( html ).toAsyncMatchNamedHTMLSnapshot( filename );
 		} );
 
 		it( "with styled text 'CTS', zoom and ratio - delivers expected result  (-> check snapshot, too)", () => {
 			// eslint-disable-next-line quotes
 			const testString = `<Logo text={"C\\nT\\nS"} background="yellow" color="brown" zoom={5} ratio={1} />`;
 			const testElement = <Logo text={"C\nT\nS"} background="yellow" color="brown" zoom={5} ratio={1} />;
-			const wrapper = shallow( testElement );
+			const filename = "Logo-CTS-styled-zoom-ratio";
 
-			const html = `${wrapper.html()}<br/><br/>${testString.replace( "<", "&lt;" ).replace( ">", "&gt;" )}`;
+			const component = shallow( testElement );
+			expect( component.exists() ).toBe( true );
 
-			return expect( html ).toAsyncMatchNamedHTMLSnapshot( "Logo-CTS-styled-zoom-ratio" );
+			const html = `${component.html()}<br/><br/>${testString.replace( "<", "&lt;" ).replace( ">", "&gt;" )}`;
+			return expect( html ).toAsyncMatchNamedHTMLSnapshot( filename );
 		} );
 	} );
 } );

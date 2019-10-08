@@ -5,10 +5,16 @@
   </head>
   <body style="display: flex; flex-flow: column nowrap; justify-content: center; align-items: center; height: 100%;">
     <h2>
-      Helper component Form - when rendering with minimal properties - delivers expected result  (-> check snapshot)
+      Helper component Form - when rendering with one textarea field - delivers expected result  (-> check snapshot)
     </h2>
     <form class="form">
       <div class="fields">
+        <div class="nolabel textarea">
+        </div>
+        <textarea name="text"
+                  class="field textarea"
+        >
+        </textarea>
       </div>
       <div class="final">
         <input type="submit"
@@ -19,6 +25,6 @@
     </form>
     <br>
     <br>
-    &lt;Form fields={{}} handleSubmit={() =&gt; null} />
+    &lt;Form fields={{ text: { type: "textarea" } }} handleSubmit={() =&gt; null} />
   </body>
 </html>

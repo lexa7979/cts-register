@@ -1,0 +1,51 @@
+
+<!DOCTYPE html>
+<html style="height: 100%;">
+  <head>
+  </head>
+  <body style="display: flex; flex-flow: column nowrap; justify-content: center; align-items: center; height: 100%;">
+    <h2>
+      Helper component Form - when rendering with a set of textarea fields - delivers expected result  (-> check snapshot)
+    </h2>
+    <form class="form">
+      <div class="fields">
+        <div class="nolabel textarea">
+        </div>
+        <textarea name="first"
+                  class="field textarea"
+        >
+        </textarea>
+        <label class="label textarea"
+               for="second"
+        >
+          second
+        </label>
+        <textarea name="second"
+                  cols="50"
+                  rows="4"
+                  class="field textarea"
+        >
+          Text input
+        </textarea>
+        <label class="label textarea"
+               for="third"
+        >
+          third
+        </label>
+        <textarea name="third"
+                  class="field textarea"
+        >
+        </textarea>
+      </div>
+      <div class="final">
+        <input type="submit"
+               value="Submit"
+               class="field submit"
+        >
+      </div>
+    </form>
+    <br>
+    <br>
+    &lt;Form fields={{ first: { type: "textarea" }, second: { type: "textarea", rows: 4, cols: 50, value: "Text input", label: "second" }, third: { type: "textarea", label: "third" } }} handleSubmit={() =&gt; null} />
+  </body>
+</html>

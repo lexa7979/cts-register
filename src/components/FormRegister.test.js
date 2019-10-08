@@ -27,7 +27,7 @@ import { shallow } from "enzyme";
 
 import FormRegister from "./FormRegister";
 
-describe( "Component FormRegister", () => {
+describe( "Component FormRegister -", () => {
 	describe( "when rendering", () => {
 		it( "with no properties - succeeds", () => {
 			const div = document.createElement( "div" );
@@ -39,11 +39,13 @@ describe( "Component FormRegister", () => {
 			// eslint-disable-next-line quotes
 			const testString = `<FormRegister />`;
 			const testElement = <FormRegister />;
-			const wrapper = shallow( testElement );
+			const filename = "FormRegister";
 
-			const html = `${wrapper.html()}<br/><br/>${testString.replace( "<", "&lt;" ).replace( ">", "&gt;" )}`;
+			const component = shallow( testElement );
+			expect( component.exists() ).toBe( true );
 
-			return expect( html ).toAsyncMatchNamedHTMLSnapshot( "FormRegister" );
+			const html = `${component.html()}<br/><br/>${testString.replace( "<", "&lt;" ).replace( ">", "&gt;" )}`;
+			return expect( html ).toAsyncMatchNamedHTMLSnapshot( filename );
 		} );
 	} );
 } );

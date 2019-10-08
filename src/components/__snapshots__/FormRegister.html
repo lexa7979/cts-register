@@ -1,16 +1,84 @@
+
 <!DOCTYPE html>
 <html style="height: 100%;">
-  <head></head>
+  <head>
+  </head>
   <body style="display: flex; flex-flow: column nowrap; justify-content: center; align-items: center; height: 100%;">
-    <h2>Component FormRegister when rendering with no properties - delivers expected result (-> check snapshot, too)</h2>
-    <!-- Content from unit test: -->
+    <h2>
+      Component FormRegister - when rendering with no properties - delivers expected result  (-> check snapshot, too)
+    </h2>
     <form class="form register">
       <div class="fields">
-        <div class="field labeled"><label for="firstname">Firstname:</label><input type="text" name="firstname" value="" placeholder="Type in your firstname?" /></div>
+        <label class="label input"
+               for="firstname"
+        >
+          Firstname:
+        </label>
+        <input type="text"
+               name="firstname"
+               value
+               placeholder="Type in your firstname."
+               class="field input"
+        >
+        <label class="label input"
+               for="lastname"
+        >
+          Lastname:
+        </label>
+        <input type="text"
+               name="lastname"
+               value
+               placeholder="Type in your lastname."
+               class="field input"
+        >
+        <label class="label radio"
+               for="participate"
+        >
+          Will you attend the conference?
+        </label>
+        <div class="field radio">
+          <div>
+            <input type="radio"
+                   id="participate-radio-1"
+                   name="participate"
+                   value="yes"
+            >
+            <label for="participate-radio-1">
+              yes
+            </label>
+          </div>
+          <div>
+            <input type="radio"
+                   id="participate-radio-2"
+                   name="participate"
+                   value="no"
+            >
+            <label for="participate-radio-2">
+              no
+            </label>
+          </div>
+          <div>
+            <input type="radio"
+                   id="participate-radio-3"
+                   name="participate"
+                   value="maybe"
+            >
+            <label for="participate-radio-3">
+              maybe
+            </label>
+          </div>
+        </div>
       </div>
-      <div class="final"><input type="submit" class="submit" value="Submit" /></div>
+      <div class="final">
+        <input type="submit"
+               name="submit"
+               value="Submit"
+               class="field submit"
+        >
+      </div>
     </form>
-    <br /><br />&lt;FormRegister /&gt;
-    <!-- End of included content -->
+    <br>
+    <br>
+    &lt;FormRegister /&gt;
   </body>
 </html>
