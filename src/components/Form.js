@@ -33,6 +33,7 @@ const propTypes = {
 	formClass:    PropTypes.string,
 	fields:       PropTypes.object.isRequired,
 	handleSubmit: PropTypes.func.isRequired,
+	validateData: PropTypes.func,
 };
 
 const defaultProps = {};
@@ -54,12 +55,14 @@ const defaultProps = {};
  *		- "submit"
  */
 export class Form extends React.Component {
-	// eslint-disable-next-line require-jsdoc
+	/**
+	 * Initialising component
+	 */
 	constructor( props ) {
 		super( props );
 
 		if (
-			this.props.fields === null
+			this.props.fields == null
 			|| typeof this.props.fields !== "object"
 			|| typeof this.props.handleSubmit !== "function"
 		) {
@@ -68,22 +71,31 @@ export class Form extends React.Component {
 
 		this.state = {
 			inputValues: {},
+			touched:     {},
+			messages:    {},
+			actions:     [],
 		};
 
-		const { fields } = this.props;
 		this.fieldList = [];
-		for ( const name in fields ) {
+		for ( const name in this.props.fields ) {
 			if ( typeof name === "string" && name !== "" ) {
-				const { type = "input", value = "" } = fields[name];
-				if (
-					typeof this[`${type}FieldGenerator`] !== "function"
-					&& typeof Form[`${type}FieldGenerator`] !== "function"
-				) {
+				const { type = "input", value = "" } = this.props.fields[name];
+				if ( typeof this[`${type}FieldGenerator`] !== "function" ) {
 					throw new Error( `Unsupported field type "${type}" (${name})` );
 				}
-				this.fieldList[name] = { ...fields[name], name, type };
+				this.fieldList[name] = { ...this.props.fields[name], name, type };
 				this.state.inputValues[name] = value;
 			}
+		}
+
+		const { actions, messages } = typeof this.props.validateData === "function"
+			? this.props.validateData( this.state.inputValues )
+			: { actions: [ "submit" ], messages: {} };
+		if ( Array.isArray( actions ) ) {
+			this.state.actions = actions;
+		}
+		if ( messages != null && typeof messages === "object" ) {
+			this.state.messages = messages;
 		}
 
 		this.handleInputChange = this.handleInputChange.bind( this );
@@ -116,6 +128,24 @@ export class Form extends React.Component {
 	}
 
 	/**
+	 * If there is a message for the given input field,
+	 * a matching component to show this text is composed.
+	 *
+	 * @param	{string}	inputName
+	 */
+	messageGenerator( inputName ) {
+		assert( typeof inputName === "string" && inputName !== "", "Invalid argument" );
+
+		if ( !this.state.touched[inputName] || !this.state.messages[inputName] ) {
+			return null;
+		}
+
+		return <div	key={`${inputName}-message`} className="message">
+			{this.state.messages[inputName]}
+		</div>;
+	}
+
+	/**
 	 * Delivers the components for a new text field.
 	 *
 	 * @param	{null|string}	data.label
@@ -126,14 +156,25 @@ export class Form extends React.Component {
 	inputFieldGenerator( data ) {
 		assert( data !== null && typeof data === "object", "Invalid argument" );
 
-		return <input key={data.name}
-			name={data.name}
-			type="text"
-			value={this.state.inputValues[data.name]}
-			placeholder={data.placeholder || null}
-			className="field input"
-			onChange={this.handleInputChange}
-		/>;
+		const allProperties = {
+			key:         data.name,
+			className:   "field input",
+			type:        "text",
+			name:        data.name,
+			value:       this.state.inputValues[data.name] || "",
+			placeholder: data.placeholder,
+			autoFocus:   data.focus ? "autofocus" : null,
+			onChange:    this.handleInputChange,
+		};
+
+		const fieldProperties = {};
+		for ( const key in allProperties ) {
+			if ( allProperties[key] != null ) {
+				fieldProperties[key] = allProperties[key];
+			}
+		}
+
+		return React.createElement( "input", fieldProperties );
 	}
 
 	/**
@@ -149,15 +190,25 @@ export class Form extends React.Component {
 	textareaFieldGenerator( data ) {
 		assert( data !== null && typeof data === "object", "Invalid argument" );
 
-		return <textarea key={data.name}
-			name={data.name}
-			value={this.state.inputValues[data.name] || ""}
-			placeholder={data.placeholder || null}
-			cols={data.cols || null}
-			rows={data.rows || null}
-			className="field textarea"
-			onChange={this.handleInputChange}
-		/>;
+		const allProperties = {
+			key:         data.name,
+			name:        data.name,
+			className:   "field textarea",
+			onChange:    this.handleInputChange,
+			value:       this.state.inputValues[data.name] || "",
+			placeholder: data.placeholder,
+			cols:        data.cols,
+			rows:        data.rows,
+		};
+
+		const fieldProperties = {};
+		for ( const key in allProperties ) {
+			if ( allProperties[key] != null ) {
+				fieldProperties[key] = allProperties[key];
+			}
+		}
+
+		return React.createElement( "textarea", fieldProperties );
 	}
 
 	/**
@@ -220,15 +271,28 @@ export class Form extends React.Component {
 	 *
 	 * @param	{*}	data
 	 */
-	static submitFieldGenerator( data ) {
+	submitFieldGenerator( data ) {
 		assert( data !== null && typeof data === "object", "Invalid argument" );
 
-		return <input key={data.name || "submit"}
-			type="submit"
-			name={data.name || null}
-			value={ data.value || "Submit" }
-			className="field submit"
-		/>;
+		const { name = "submit", value = "Submit" } = data;
+
+		const allProperties = {
+			key:       name,
+			type:      "submit",
+			name,
+			value,
+			className: "field submit",
+			disabled:  this.state.actions.indexOf( name ) >= 0 ? null : "disabled",
+		};
+
+		const fieldProperties = {};
+		for ( const key in allProperties ) {
+			if ( allProperties[key] != null ) {
+				fieldProperties[key] = allProperties[key];
+			}
+		}
+
+		return React.createElement( "input", fieldProperties );
 	}
 
 	/**
@@ -241,11 +305,35 @@ export class Form extends React.Component {
 		const { name } = event.target;
 		const value = event.target.type === "checkbox" ? event.target.checked : event.target.value;
 
-		this.setState( { inputValues: { ...this.state.inputValues, [name]: value } } );
+		const stateUpdate = {
+			inputValues: {
+				...this.state.inputValues,
+				[name]: value,
+			},
+		};
+
+		if ( this.state.touched[name] !== true ) {
+			stateUpdate.touched = {
+				...this.state.touched,
+				[name]: true,
+			};
+		}
+
+		if ( typeof this.props.validateData === "function" ) {
+			const { actions, messages } = this.props.validateData( stateUpdate.inputValues );
+			if ( Array.isArray( actions ) ) {
+				stateUpdate.actions = actions;
+			}
+			if ( messages != null && typeof messages === "object" ) {
+				stateUpdate.messages = messages;
+			}
+		}
+
+		this.setState( stateUpdate );
 	}
 
 	/**
-	 *
+	 * Handles events whenever a user clicks on one of the submit buttons
 	 */
 	onSubmit( event ) {
 		event.preventDefault();
@@ -255,7 +343,9 @@ export class Form extends React.Component {
 		}
 	}
 
-	// eslint-disable-next-line require-jsdoc
+	/**
+	 * Composing output
+	 */
 	render() {
 		if ( this.fieldList === null || typeof this.fieldList !== "object" ) {
 			return <div className="empty-form"></div>;
@@ -266,18 +356,23 @@ export class Form extends React.Component {
 		for ( const name in this.fieldList ) {	// eslint-disable-line guard-for-in
 			const data = this.fieldList[name];
 			if ( data.type === "submit" ) {
-				submitFields.push( Form.submitFieldGenerator( data ) );
+				submitFields.push( this.submitFieldGenerator( data ) );
 			} else if ( typeof this[`${data.type}FieldGenerator`] === "function" ) {
-				formFields.push( Form.labelGenerator( data.name, data.label, data.type ) );
+				formFields.push( Form.labelGenerator( data.name, data.label, data.type, data.required ) );
 				formFields.push( this[`${data.type}FieldGenerator`]( data ) );
 			} else {
-				formFields.push( Form.labelGenerator( data.name, data.label, data.type ) );
+				formFields.push( Form.labelGenerator( data.name, data.label, data.type, data.required ) );
 				formFields.push( Form[`${data.type}FieldGenerator`]( data ) );
+			}
+
+			const message = this.messageGenerator( data.name );
+			if ( message ) {
+				formFields.push( message );
 			}
 		}
 
 		if ( submitFields.length === 0 ) {
-			submitFields.push( Form.submitFieldGenerator( { value: "Submit" } ) );
+			submitFields.push( this.submitFieldGenerator( { value: "Submit" } ) );
 		}
 
 		return <form

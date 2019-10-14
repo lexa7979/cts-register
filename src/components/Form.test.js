@@ -60,7 +60,6 @@ describe( "Helper component Form -", () => {
 
 			const html = `${component.html()}<br/><br/>${testString.replace( "<", "&lt;" ).replace( ">", "&gt;" )}`;
 			return expect( html ).toAsyncMatchNamedHTMLSnapshot( filename );
-
 		} );
 
 		it( "with one input field - delivers expected result  (-> check snapshot)", () => {

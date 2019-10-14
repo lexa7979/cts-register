@@ -51,29 +51,62 @@ export class FormRegister extends React.Component {
 				type:        "input",
 				label:       "Lastname:",
 				placeholder: "Type in your lastname.",
-				required:    true,
 			},
 			participate: {
 				type:        "radio",
-				label:       "Will you attend the conference?",
-				options:     [ "yes", "no", "maybe" ],
-				required:    true,
+				label:       "Are you going to attend the conference?",
+				options:     [ "Yes", "No", "Maybe" ],
 			},
 			submit: {
 				type:        "submit",
 				label:       "",
 			},
 		};
+	}
 
-		// eslint-disable-next-line no-console
-		this.handleSubmit = inputData => console.log( "Form was submitted", inputData );
+	/**
+	 *
+	 * @param	{*}	inputData
+	 */
+	validateData( inputData ) {	// eslint-disable-line class-methods-use-this
+		const messages = {};
+		if ( !inputData.firstname ) {
+			messages.firstname = "Missing input: Firstname";
+		}
+		if ( !inputData.lastname ) {
+			messages.lastname = "Missing input: Lastname";
+		}
+		if ( !inputData.participate ) {
+			messages.participate = "Choose one of the alternatives";
+		}
+
+		console.log( "Validating...", inputData, messages );	// eslint-disable-line no-console
+
+		return {
+			actions: Object.keys( messages ).length ? [] : [ "submit" ],
+			messages,
+		};
+	}
+
+	/**
+	 *
+	 *
+	 * @param	{object}	inputData
+	 */
+	handleSubmit( inputData ) {	// eslint-disable-line class-methods-use-this
+		console.log( "Form was submitted", inputData );	// eslint-disable-line no-console
 	}
 
 	/**
 	 * Composing output
 	 */
 	render() {
-		return <Form formClass="register" fields={this.formFields} handleSubmit={this.handleSubmit} />;
+		return <Form
+			formClass="register"
+			fields={this.formFields}
+			handleSubmit={this.handleSubmit}
+			validateData={this.validateData}
+		/>;
 	}
 }
 
