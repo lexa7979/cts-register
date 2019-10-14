@@ -20,11 +20,11 @@ module.exports = {
 	},
 	// https://eslint.org/docs/user-guide/configuring#specifying-parser-options
     "parserOptions": {
-        "ecmaFeatures": {
-            "jsx": true
-        },
+        "sourceType": "module",
         "ecmaVersion": 2018,
-        "sourceType": "module"
+        "ecmaFeatures": {
+			"jsx": true,
+        }
 	},
 	// https://eslint.org/docs/user-guide/configuring#configuring-plugins
     plugins: [

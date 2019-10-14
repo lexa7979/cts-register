@@ -3,9 +3,11 @@
 	"version": "0.1.0",
 	"private": true,
 	"dependencies": {
+		"font-awesome": "^4.7.0",
+		"mongodb": "^3.3.2",
 		"node-sass": "^4.12.0",
-		"react": "^16.10.1",
-		"react-dom": "^16.10.1",
+		"react": "^16.10.2",
+		"react-dom": "^16.10.2",
 		"react-scripts": "3.1.2"
 	},
 	"scripts": {
@@ -15,7 +17,13 @@
 		"test:update": "react-scripts test -u",
 		"eject": "react-scripts eject",
 		"lint": "eslint **/*.js",
-		"link:eslint": "npm link @lexa79/eslint-config"
+		"local-link:eslint": "npm link @lexa79/eslint-config",
+		"db:docker:start": "docker-compose up -d",
+		"db:docker:ps": "docker-compose ps",
+		"db:docker:logs": "docker-compose logs -f -t",
+		"db:docker:inspect": "docker-compose exec database /bin/sh -c \"cd /data/db; /bin/bash\"",
+		"db:docker:stop": "docker-compose down",
+		"db:docker:clear": "docker-compose down -v"
 	},
 	"eslintConfig": {
 		"extends": "react-app"
@@ -33,14 +41,14 @@
 		]
 	},
 	"devDependencies": {
-		"@lexa79/eslint-config": "^1.0.0",
-		"@lexa79/jest-matchers": "^1.0.0",
+		"@lexa79/eslint-config": "^1.0.2",
+		"@lexa79/jest-matchers": "^1.0.2",
 		"enzyme": "^3.10.0",
-		"enzyme-adapter-react-16": "^1.14.0",
-		"enzyme-to-json": "^3.4.0",
-		"eslint": "^6.5.0",
+		"enzyme-adapter-react-16": "^1.15.1",
+		"enzyme-to-json": "^3.4.2",
+		"eslint": "^6.5.1",
 		"eslint-plugin-jest": "^22.17.0",
-		"eslint-plugin-react": "^7.14.3",
+		"eslint-plugin-react": "^7.16.0",
 		"jest-spec-reporter": "^1.0.8",
 		"prettier": "^1.18.2"
 	}
