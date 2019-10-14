@@ -32,21 +32,33 @@ import { FormRegister, Logo } from "./components";
  * Base component which hosts everything else.
  */
 export class App extends React.Component {
-	// eslint-disable-next-line class-methods-use-this,require-jsdoc
-	render() {
+	/**
+	 * Composing output
+	 */
+	render() {	// eslint-disable-line class-methods-use-this
 		return (
 			<div className="app">
-				{/* <h1>Cygni Tech Summit 2020</h1> */}
-				<Logo
-					text={"CYGNI\nTECH\nSUMMIT\n 2020_"}
-					background="#323232"
-					color={[ "white", "white", "white", "#8cc63f" ]}
-					zoom={3}
-					ratio={1}
-					animation="running-point:#0099ff"
-				/>
-				<FormRegister />
-				<Logo text="LEXA" background="white" color="lightgreen" zoom={2} animation="running-point:red" />
+				<div className="header">
+					<Logo
+						text={"CYGNI TECH SUMMIT\n2020_"}
+						background="#333"
+						color={[ "white", "#9c4" ]}
+						zoom={2}
+						animation="running-point:#09f"
+					/>
+				</div>
+				<div className="main">
+					<FormRegister />
+				</div>
+				<div className="footer">
+					<Logo
+						text="BY LEXA"
+						background="#333"
+						color="#9c4"
+						zoom={2}
+						animation="running-point:#333"
+					/>
+				</div>
 			</div>
 		);
 	}
