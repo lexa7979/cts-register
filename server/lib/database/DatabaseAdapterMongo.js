@@ -23,37 +23,35 @@
  */
 /* eslint-disable class-methods-use-this */
 
-import DatabaseAdapter from "./DatabaseAdapter";
+import DatabaseAdapterInterface from "./DatabaseAdapterInterface";
 
 import assert from "assert";
 import { MongoClient } from "mongodb";
 
 import Configuration from "../../.dbsetup";
 
+
 /**
  * Implements the common API of DatabaseAdapter to store data in a Mongo-DB datasource.
  *
- * Best way to start using this is to call DatabaseAdapter.init( "Mongo", <collection> ).
+ * A good way to start using this class is by calling
+ *		DatabaseAdapter.init( "Mongo", <collection> ).
  *
- * @implements {DatabaseAdapter}
+ * @implements {DatabaseAdapterInterface}
  */
-export class DatabaseAdapterMongo extends DatabaseAdapter {
+export class DatabaseAdapterMongo extends DatabaseAdapterInterface {
 	/**
-	 * Preparing a new instance to store data which is related to the given collection.
-	 *
-	 * Please note:
-	 * This constructor will be called by DatabaseAdapter.init().
-	 * It's not recommended to call it directly.
+	 * Preparing a new instance to store data which is related to the given collection
+	 * in a Mongo-DB datasource which is configured in file .dbsetup.js
 	 *
 	 * @param	{string}	collection
 	 *		Name of a collection inside the datasource where similar data is stored, e.g.
 	 *			"users"
-	 */
+	 * /
 	constructor( collection ) {
 		super( collection );
-
-		this.connection = null;
-		this.revisions = null;
+		// this.connection = null;
+		// this.revisions = null;
 	}
 
 	/**
@@ -134,12 +132,23 @@ export class DatabaseAdapterMongo extends DatabaseAdapter {
 		}
 
 		if ( this.connection == null ) {
-			return MongoClient.connect( Configuration.url )
+			return MongoClient.connect(
+				Configuration.url,
+				{
+					useNewUrlParser:    true,
+					useUnifiedTopology: true,	// https://github.com/mongodb/node-mongodb-native/releases/tag/v3.2.1
+
+					auth: {
+						user:     Configuration.login,
+						password: Configuration.password,
+					},
+				}
+			)
 				.then( client => {
 					const db = client.db( Configuration.database );
 					this.connection = db.collection( this.collection );
 					this.revisions = db.collection( "revisions" );
-					client.close();
+					return client.close();
 				} );
 		}
 
@@ -250,7 +259,12 @@ export class DatabaseAdapterMongo extends DatabaseAdapter {
 		return ( id == null ? Promise.resolve( false ) : this.checkItem( id ) )
 			.then( oldRecordFound => {
 				if ( !oldRecordFound ) {
-					return this.connection.insertOne( { data } );
+					return this.connection.insertOne( id == null ? { data } : { data, _id: id } )
+						.then( result => {
+							assert( result.insertedCount === 1,
+								"Adding new recordset failed" );
+							return String( result.insertedId );
+						} );
 				}
 
 				switch ( handleConflict ) {
@@ -260,20 +274,13 @@ export class DatabaseAdapterMongo extends DatabaseAdapter {
 				case "skip":
 					return null;
 				case "ignore":
-					return this.connection.replaceOne( { _id: id }, { data, _id: id } );
+					return this.connection.replaceOne( { _id: id }, { data, _id: id } )
+						.then( result => {
+							assert( result.modifiedCount === 1,
+								"Adding new recordset faied" );
+							return id;
+						} );
 				}
-			} )
-			.then( result => {
-				if ( result == null ) {
-					return null;
-				}
-
-				assert( result.insertedCount === 1 || result.upsertedCount === 1,
-					"Adding new recordset failed" );
-				if ( id == null ) {
-					return result.insertedId == null ? result.upsertedId._id : result.insertedId._id;	// eslint-disable-line no-underscore-dangle
-				}
-				return id;
 			} );
 	}
 
@@ -342,7 +349,5 @@ export class DatabaseAdapterMongo extends DatabaseAdapter {
 			} );
 	}
 }
-
-DatabaseAdapterMongo.prototype.checkItem = () => null;
 
 export default DatabaseAdapterMongo;

@@ -22,3 +22,10 @@
  * SOFTWARE.
  */
 
+const health = require( "./health" );
+const attendee = require( "./attendee" );
+
+module.exports = {
+	health,
+	attendee,
+};

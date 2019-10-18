@@ -3,27 +3,22 @@
 	"version": "0.1.0",
 	"private": true,
 	"dependencies": {
+		"cross-env": "^6.0.3",
 		"font-awesome": "^4.7.0",
-		"mongodb": "^3.3.2",
 		"node-sass": "^4.12.0",
 		"react": "^16.10.2",
 		"react-dom": "^16.10.2",
 		"react-scripts": "3.1.2"
 	},
+	"proxy": "http://localhost:3011",
 	"scripts": {
-		"start": "react-scripts start",
+		"start": "cross-env PORT=3012 react-scripts start",
 		"build": "react-scripts build",
 		"test": "react-scripts test --reporters=jest-spec-reporter",
 		"test:update": "react-scripts test -u",
 		"eject": "react-scripts eject",
 		"lint": "eslint **/*.js",
-		"local-link:eslint": "npm link @lexa79/eslint-config",
-		"db:docker:start": "docker-compose up -d",
-		"db:docker:ps": "docker-compose ps",
-		"db:docker:logs": "docker-compose logs -f -t",
-		"db:docker:inspect": "docker-compose exec database /bin/sh -c \"cd /data/db; /bin/bash\"",
-		"db:docker:stop": "docker-compose down",
-		"db:docker:clear": "docker-compose down -v"
+		"local-link:eslint": "npm link @lexa79/eslint-config"
 	},
 	"eslintConfig": {
 		"extends": "react-app"
@@ -50,6 +45,7 @@
 		"eslint-plugin-jest": "^22.17.0",
 		"eslint-plugin-react": "^7.16.0",
 		"jest-spec-reporter": "^1.0.8",
-		"prettier": "^1.18.2"
+		"prettier": "^1.18.2",
+		"promise-essentials": "0.0.8"
 	}
 }

@@ -25,42 +25,12 @@
 /* eslint-disable class-methods-use-this,no-unused-vars */
 
 import assert from "assert";
-import DatabaseAdapterMongo from "./DatabaseAdapterMongo";
 
 /**
  * Abstract class which is used to give an exchangeable API
  * to store recordsets in a documentbased database.
- *
- * @interface
  */
-class DatabaseAdapter {
-	/**
-	 * Use this function to initialise one of the known database adapters
-	 * in order to handle a fixed collection.
-	 *
-	 * @param	{string}	adapterName
-	 *		Identifier of the database adapter which shall be used.
-	 *		These adapters are supported so far:
-	 *		- "Mongo"
-	 * @param	{string}	collection
-	 *		Name of a collection inside the datasource where similar data is stored, e.g.
-	 *			"users"
-	 */
-	static init( adapterName, collection ) {
-		assert( typeof adapterName === "string" && adapterName !== "",
-			"Invalid argument \"adapterName\"" );
-		assert( typeof collection === "string" && collection !== "",
-			"Invalid argument \"collection\"" );
-
-		switch ( adapterName ) {
-		default:
-			throw new Error( "Invalid argument \"adapterName\"" );
-		case "Mongo":
-		case "DatabaseAdapterMongo":
-			return new DatabaseAdapterMongo( collection );
-		}
-	}
-
+export class DatabaseAdapterInterface {
 	/**
 	 * Checks the structure of the derived adapter class.
 	 *
@@ -73,13 +43,12 @@ class DatabaseAdapter {
 	 *			"users"
 	 */
 	constructor( collection ) {
-		assert( new.target === "DatabaseAdapter",
-			"You can't use interface DatabaseAdapter directly, use a derivate instead" );
+		assert( new.target !== "DatabaseAdapterInterface",
+			"You can't use interface DatabaseAdapterInterface directly, use a derivate instead" );
 
 		const thisClass = Object.getPrototypeOf( this );
 		[
 			"connect",
-			// "hasRevisions",
 			"checkItem",
 			"countItems",
 			"findItems",
@@ -89,14 +58,67 @@ class DatabaseAdapter {
 			"removeItem",
 		].forEach( name => {
 			assert( Object.prototype.hasOwnProperty.call( thisClass, name ) && typeof this[name] === "function",
-				`Derivation of DatabaseAdapter is missing mandatory implementation of ${name}()` );
+				`Derivation of DatabaseAdapterInterface is missing mandatory implementation of ${name}()` );
 		} );
 
-		assert(
-			typeof collection === "string" && collection !== "",
-			"Can't construct implementation of DatabaseAdapter: Invalid argument"
-		);
+		assert( typeof collection === "string" && collection !== "",
+			"Can't construct implementation of DatabaseAdapterInterface: Invalid argument" );
 		Object.defineProperty( this, "collection", { value: collection, writable: false } );
+
+		this.connection = null;
+
+		this.features = {
+			cache: false,
+		};
+	}
+
+	/**
+	 * Checks if the current implementation of the database adapter
+	 * supports the given feature.
+	 *
+	 * @param	{string}	feature
+	 *		Name of the feature you want to use. The following values are supported:
+	 *		- "cache"
+	 *				Every queried recordset or list is cached in memory
+	 *				together with the current revision number of the collection.
+	 *				With every change of the collection the revision number
+	 *				will be incremented; this must also be done by any other
+	 *				application accessing the same collection.
+	 *				When the same recordset or list is needed again and
+	 *				the revision number is still "valid" the cached data
+	 *				will be delivered instead of querying it from the database again.
+	 */
+	hasFeature( feature ) {
+		assert( typeof feature === "string" && feature !== "" && this.features[feature] != null,
+			"Invalid argument \"feature\"" );
+
+		switch ( feature ) {
+		default:
+			throw new Error( `Unknown feature given (${feature}).` );
+		case "cache":
+			return typeof this.cacheGetRevision === "function"
+				&& typeof this.cacheCheckRevision === "function"
+				&& typeof this.cacheNextRevision === "function";
+		}
+	}
+
+	/**
+	 * Activates the given feature.
+	 *
+	 * @param	{string}	feature
+	 * @param	{string}	handleConflict
+	 */
+	enableFeature( feature, handleConflict = "error" ) {
+		assert( typeof feature === "string" && feature !== "" && this.features[feature] != null,
+			"Invalid argument \"feature\"" );
+		assert( [ "error", "skip" ].indexOf( handleConflict ) >= 0,
+			"Invalid argument \"handleConflict\"" );
+
+		if ( handleConflict === "error" && !this.hasFeature( feature ) ) {
+			throw new Error( `${this.constructor.name} doesn't support feature "${feature}"` );
+		}
+
+		this.features[feature] = true;
 	}
 
 	/**
@@ -110,6 +132,13 @@ class DatabaseAdapter {
 	 */
 	connect() {
 		return Promise.reject( new Error( "Unexpected call of base class method" ) );
+	}
+
+	/**
+	 * Checks if a
+	 * /
+	isConnected() {
+		return this.connection != null;
 	}
 
 	/**
@@ -269,4 +298,4 @@ class DatabaseAdapter {
 	}
 }
 
-export default DatabaseAdapter;
+export default DatabaseAdapterInterface;
