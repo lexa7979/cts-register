@@ -24,7 +24,7 @@
 
 import React from "react";
 
-import Form from "./Form";
+import { Form } from "./form";
 
 const propTypes = {};
 const defaultProps = {};

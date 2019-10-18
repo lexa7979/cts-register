@@ -22,5 +22,15 @@
  * SOFTWARE.
  */
 
-export { FormRegister } from "./FormRegister";
-export { Logo } from "./Logo";
+
+import input from "./input";
+import textarea from "./textarea";
+import radio from "./radio";
+import submit from "./submit";
+
+export default {
+	input,
+	textarea,
+	radio,
+	submit,
+};

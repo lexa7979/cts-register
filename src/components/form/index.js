@@ -22,5 +22,4 @@
  * SOFTWARE.
  */
 
-export { FormRegister } from "./FormRegister";
-export { Logo } from "./Logo";
+export { Form } from "./Form";

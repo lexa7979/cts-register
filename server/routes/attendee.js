@@ -48,12 +48,11 @@ function getAttendee( record ) {
  * @param {*} record
  */
 function saveAttendee( record, handleConflicts = "error" ) {
-	assert( typeof record === "object", "Invalid argument \"record\"" );
+	assert( record != null && typeof record === "object",
+		"Invalid argument \"record\"" );
 	[ "firstname", "lastname", "attending" ].forEach( key => {
-		assert(
-			typeof record[key] === "string" && record[key] !== "",
-			`Invalid argument "record.${key}"`
-		);
+		assert( typeof record[key] === "string" && record[key] !== "",
+			`Invalid argument "record.${key}"` );
 	} );
 
 	const check = getAttendee( record );

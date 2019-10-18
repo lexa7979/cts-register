@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-@import "../mixins";
+@import "../../mixins";
 
 .form {
 	@include flex( column, $horizontal: center );

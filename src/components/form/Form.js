@@ -27,6 +27,8 @@ import assert from "assert";
 import React from "react";
 import PropTypes from "prop-types";
 
+import FormTypes from "./types";
+
 import "./Form.scss";
 
 const propTypes = {
@@ -39,20 +41,7 @@ const propTypes = {
 const defaultProps = {};
 
 /**
- * Component which contains an input form.
- *
- * @property Component.fields
- *		The needed input fields must be given as an object-property "fields".
- *		The following input types are supported:
- *		- "input" with optional settings "label", "value", "placeholder", e.g.
- *				fullname: { type: "input", label: "What's your name?" }
- *		- "textarea" with optional settings "label", "value", "placeholder", "cols", "rows", e.g.
- *	 			comments: { type: "textarea", placeholder: "Any comments?", rows: 3 }
- *		- "select"
- *		- "checkbox"
- *		- "radio"
- *		- "hidden"
- *		- "submit"
+ * Component which contains an input form
  */
 export class Form extends React.Component {
 	/**
@@ -80,7 +69,7 @@ export class Form extends React.Component {
 		for ( const name in this.props.fields ) {
 			if ( typeof name === "string" && name !== "" ) {
 				const { type = "input", value = "" } = this.props.fields[name];
-				if ( typeof this[`${type}FieldGenerator`] !== "function" ) {
+				if ( typeof FormTypes[type] !== "object" || typeof FormTypes[type].generateField !== "function" ) {
 					throw new Error( `Unsupported field type "${type}" (${name})` );
 				}
 				this.fieldList[name] = { ...this.props.fields[name], name, type };
@@ -146,156 +135,6 @@ export class Form extends React.Component {
 	}
 
 	/**
-	 * Delivers the components for a new text field.
-	 *
-	 * @param	{null|string}	data.label
-	 * @param	{string}	data.name
-	 * @param	{null|string}	data.value
-	 * @param	{null|string}	data.placeholder
-	 */
-	inputFieldGenerator( data ) {
-		assert( data !== null && typeof data === "object", "Invalid argument" );
-
-		const allProperties = {
-			key:         data.name,
-			className:   "field input",
-			type:        "text",
-			name:        data.name,
-			value:       this.state.inputValues[data.name] || "",
-			placeholder: data.placeholder,
-			autoFocus:   data.focus ? "autofocus" : null,
-			onChange:    this.handleInputChange,
-		};
-
-		const fieldProperties = {};
-		for ( const key in allProperties ) {
-			if ( allProperties[key] != null ) {
-				fieldProperties[key] = allProperties[key];
-			}
-		}
-
-		return React.createElement( "input", fieldProperties );
-	}
-
-	/**
-	 * Delivers the components for a new multiline text field.
-	 *
-	 * @param	{null|string}	data.label
-	 * @param	{string}	data.name
-	 * @param	{null|string}	data.value
-	 * @param	{null|string}	data.placeholder
-	 * @param	{null|number}	data.cols
-	 * @param	{null|number}	data.rows
-	 */
-	textareaFieldGenerator( data ) {
-		assert( data !== null && typeof data === "object", "Invalid argument" );
-
-		const allProperties = {
-			key:         data.name,
-			name:        data.name,
-			className:   "field textarea",
-			onChange:    this.handleInputChange,
-			value:       this.state.inputValues[data.name] || "",
-			placeholder: data.placeholder,
-			cols:        data.cols,
-			rows:        data.rows,
-		};
-
-		const fieldProperties = {};
-		for ( const key in allProperties ) {
-			if ( allProperties[key] != null ) {
-				fieldProperties[key] = allProperties[key];
-			}
-		}
-
-		return React.createElement( "textarea", fieldProperties );
-	}
-
-	/**
-	 * Delivers the components for a new select box.
-	 *
-	 * @param	{object}	data
-	 * /
-	selectFieldGenerator( data ) {
-		assert( data !== null && typeof data === "object", "Invalid argument" );
-	}
-
-	/**
-	 * Delivers the components for a new checkbox field.
-	 *
-	 * @param {*} data
-	 * /
-	checkboxFieldGenerator( data ) {
-		assert( data !== null && typeof data === "object", "Invalid argument" );
-	}
-
-	/**
-	 * Delivers the components for a new group of radio buttons.
-	 *
-	 * @param	{*}	data
-	 */
-	radioFieldGenerator( data ) {
-		assert( data !== null && typeof data === "object", "Invalid argument" );
-
-		const buttonList = [];
-		for ( let index = 0; index < data.options.length; index++ ) {
-			const id = `${data.name}-radio-${index + 1}`;
-			buttonList.push( <div key={id}>
-				<input
-					type="radio"
-					id={id}
-					name={data.name}
-					value={data.options[index]}
-					onChange={this.handleInputChange}
-				/>
-				<label htmlFor={id}>{data.options[index]}</label>
-			</div> );
-		}
-
-		return <div key={data.name} className="field radio">{buttonList}</div>;
-	}
-
-	/**
-	 * Delivers the components for a new hidden field.
-	 *
-	 * @param	{*}	data
-	 * /
-	hiddenFieldGenerator( data ) {
-		assert( data !== null && typeof data === "object", "Invalid argument" );
-
-		return <input type="hidden" key={data.name} name={data.name} value={data.value} />;
-	}
-
-	/**
-	 * Delivers the component for a new submit button.
-	 *
-	 * @param	{*}	data
-	 */
-	submitFieldGenerator( data ) {
-		assert( data !== null && typeof data === "object", "Invalid argument" );
-
-		const { name = "submit", value = "Submit" } = data;
-
-		const allProperties = {
-			key:       name,
-			type:      "submit",
-			name,
-			value,
-			className: "field submit",
-			disabled:  this.state.actions.indexOf( name ) >= 0 ? null : "disabled",
-		};
-
-		const fieldProperties = {};
-		for ( const key in allProperties ) {
-			if ( allProperties[key] != null ) {
-				fieldProperties[key] = allProperties[key];
-			}
-		}
-
-		return React.createElement( "input", fieldProperties );
-	}
-
-	/**
 	 * Handles the change event of any form field
 	 *
 	 * @param	{object}	event
@@ -356,13 +195,10 @@ export class Form extends React.Component {
 		for ( const name in this.fieldList ) {	// eslint-disable-line guard-for-in
 			const data = this.fieldList[name];
 			if ( data.type === "submit" ) {
-				submitFields.push( this.submitFieldGenerator( data ) );
-			} else if ( typeof this[`${data.type}FieldGenerator`] === "function" ) {
+				submitFields.push( FormTypes.submit.generateField.call( this, data ) );
+			} else if ( typeof FormTypes[data.type] === "object" ) {
 				formFields.push( Form.labelGenerator( data.name, data.label, data.type, data.required ) );
-				formFields.push( this[`${data.type}FieldGenerator`]( data ) );
-			} else {
-				formFields.push( Form.labelGenerator( data.name, data.label, data.type, data.required ) );
-				formFields.push( Form[`${data.type}FieldGenerator`]( data ) );
+				formFields.push( FormTypes[data.type].generateField.call( this, data ) );
 			}
 
 			const message = this.messageGenerator( data.name );
@@ -372,7 +208,7 @@ export class Form extends React.Component {
 		}
 
 		if ( submitFields.length === 0 ) {
-			submitFields.push( this.submitFieldGenerator( { value: "Submit" } ) );
+			submitFields.push( FormTypes.submit.generateField.call( this, { value: "Submit" } ) );
 		}
 
 		return <form
