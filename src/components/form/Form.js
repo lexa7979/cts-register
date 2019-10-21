@@ -32,9 +32,9 @@ import FormTypes from "./types";
 import "./Form.scss";
 
 const propTypes = {
-	formClass:    PropTypes.string,
 	fields:       PropTypes.object.isRequired,
 	handleSubmit: PropTypes.func.isRequired,
+	formClass:    PropTypes.string,
 	validateData: PropTypes.func,
 };
 
@@ -50,14 +50,6 @@ export class Form extends React.Component {
 	constructor( props ) {
 		super( props );
 
-		if (
-			this.props.fields == null
-			|| typeof this.props.fields !== "object"
-			|| typeof this.props.handleSubmit !== "function"
-		) {
-			return;
-		}
-
 		this.state = {
 			inputValues: {},
 			touched:     {},
@@ -69,26 +61,74 @@ export class Form extends React.Component {
 		for ( const name in this.props.fields ) {
 			if ( typeof name === "string" && name !== "" ) {
 				const { type = "input", value = "" } = this.props.fields[name];
-				if ( typeof FormTypes[type] !== "object" || typeof FormTypes[type].generateField !== "function" ) {
-					throw new Error( `Unsupported field type "${type}" (${name})` );
-				}
-				this.fieldList[name] = { ...this.props.fields[name], name, type };
+				assert(
+					FormTypes[type] != null
+					&& typeof FormTypes[type] === "object"
+					&& typeof FormTypes[type].generateField === "function",
+					`Unsupported field type "${type}" (${name})`
+				);
+				this.fieldList[name] = {
+					...this.props.fields[name],
+					name,
+					type,
+				};
 				this.state.inputValues[name] = value;
 			}
 		}
 
-		const { actions, messages } = typeof this.props.validateData === "function"
-			? this.props.validateData( this.state.inputValues )
-			: { actions: [ "submit" ], messages: {} };
-		if ( Array.isArray( actions ) ) {
-			this.state.actions = actions;
-		}
-		if ( messages != null && typeof messages === "object" ) {
-			this.state.messages = messages;
-		}
+		this.validation = {
+			progressing: false,
+			requested:   false,
+		};
 
 		this.handleInputChange = this.handleInputChange.bind( this );
 		this.onSubmit = this.onSubmit.bind( this );
+	}
+
+	/**
+	 * Actions to take when component is ready
+	 */
+	componentDidMount() {
+		this.runValidation();
+	}
+
+	/**
+	 * Validates the form inputs if props.validateData is given
+	 *
+	 * If another (asynchronous) validation is already in progress,
+	 * nothing will be done, now. Still, it's memorised that
+	 * another validation shall be run just after the active one
+	 * has finished.
+	 */
+	runValidation() {
+		if ( typeof this.props.validateData !== "function" ) {
+			return Promise.resolve();
+		}
+
+		if ( this.validation.progressing ) {
+			this.validation.requested = true;
+			return Promise.resolve();
+		}
+		this.validation.progressing = true;
+
+		return Promise.resolve( this.props.validateData( this.state.inputValues ) )
+			.then( result => {
+				console.log( result );
+
+				if (
+					result != null && typeof result === "object"
+					&& Array.isArray( result.actions )
+					&& result.messages != null && typeof result.messages === "object"
+				) {
+					this.setState( { actions: result.actions, messages: result.messages } );
+				}
+
+				this.validation.progressing = false;
+				if ( this.validation.requested ) {
+					this.validation.requested = false;
+					this.runValidation();
+				}
+			} );
 	}
 
 	/**
@@ -158,17 +198,9 @@ export class Form extends React.Component {
 			};
 		}
 
-		if ( typeof this.props.validateData === "function" ) {
-			const { actions, messages } = this.props.validateData( stateUpdate.inputValues );
-			if ( Array.isArray( actions ) ) {
-				stateUpdate.actions = actions;
-			}
-			if ( messages != null && typeof messages === "object" ) {
-				stateUpdate.messages = messages;
-			}
-		}
-
-		this.setState( stateUpdate );
+		this.setState( stateUpdate, () => {
+			this.runValidation();
+		} );
 	}
 
 	/**

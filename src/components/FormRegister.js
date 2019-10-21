@@ -22,11 +22,20 @@
  * SOFTWARE.
  */
 
+/* eslint-disable class-methods-use-this */
+
 import React from "react";
+import PropTypes from "prop-types";
+import Axios from "axios";
+
+import assert from "assert";
 
 import { Form } from "./form";
 
-const propTypes = {};
+const propTypes = {
+	serverAvailable: PropTypes.bool,
+};
+
 const defaultProps = {};
 
 /**
@@ -52,40 +61,70 @@ export class FormRegister extends React.Component {
 				label:       "Lastname:",
 				placeholder: "Type in your lastname.",
 			},
-			participate: {
-				type:        "radio",
-				label:       "Are you going to attend the conference?",
-				options:     [ "Yes", "No", "Maybe" ],
+			attending: {
+				type:    "radio",
+				label:   "Are you going to attend the conference?",
+				options: [ "Yes", "No", "Maybe" ],
 			},
 			submit: {
-				type:        "submit",
-				label:       "",
+				type:  "submit",
+				label: "Submit",
+			},
+			update: {
+				type:  "submit",
+				label: "Update",
 			},
 		};
+
+		this.validateData = this.validateData.bind( this );
 	}
 
 	/**
+	 * Checks if the data of the input form is valid,
+	 * also by contacting the database server.
 	 *
-	 * @param	{*}	inputData
+	 * @param	{object}	inputData
+	 *		Current data of the input form
+	 *
+	 * @returns	{Promise<object>}
+	 *		Resolves with an object stating errors and possible submit-actions
 	 */
-	validateData( inputData ) {	// eslint-disable-line class-methods-use-this
-		const messages = {};
-		if ( !inputData.firstname ) {
-			messages.firstname = "Missing input: Firstname";
-		}
-		if ( !inputData.lastname ) {
-			messages.lastname = "Missing input: Lastname";
-		}
-		if ( !inputData.participate ) {
-			messages.participate = "Choose one of the alternatives";
-		}
-
-		console.log( "Validating...", inputData, messages );	// eslint-disable-line no-console
-
-		return {
-			actions: Object.keys( messages ).length ? [] : [ "submit" ],
-			messages,
+	validateData( inputData ) {
+		const messages = {
+			firstname: inputData.firstname.trim() ? null : "Missing input: Firstname",
+			lastname:  inputData.lastname.trim() ? null : "Missing input: Lastname",
+			attending: inputData.attending ? null : "Choose one of the alternatives",
+			submit:    this.props.serverAvailable
+				? null
+				: "Can't connect to the database server - please try again, later",
 		};
+		if ( Object.keys( messages ).filter( key => messages[key] != null ).length > 0 ) {
+			return Promise.resolve( { actions: [], messages } );
+		}
+
+		return Axios.get(
+			`/attendee/${inputData.firstname.trim()}/${inputData.lastname.trim()}`,
+			{ validateStatus: null }
+		)
+			.then( response => {
+				switch ( response.status ) {
+				case 200:
+					if ( response.data.attending.toLowerCase() === inputData.attending.toLowerCase() ) {
+						return {
+							actions:  [],
+							messages: { submit: "You answer was already saved, before." },
+						};
+					}
+					return {
+						actions:  [ "update" ],
+						messages: { submit: "Do you want to change your previous answer?" },
+					};
+				case 404:
+					return { actions: [ "submit" ], messages: {} };
+				default:
+					return { actions: [], messages: { submit: response.data } };
+				}
+			} );
 	}
 
 	/**
@@ -93,8 +132,20 @@ export class FormRegister extends React.Component {
 	 *
 	 * @param	{object}	inputData
 	 */
-	handleSubmit( inputData ) {	// eslint-disable-line class-methods-use-this
-		console.log( "Form was submitted", inputData );	// eslint-disable-line no-console
+	handleSubmit( inputData ) {
+		return this.validateData( inputData )
+			.then( result => {
+				assert( Array.isArray( result.actions ) && result.actions.length > 0 );
+				const data = {
+					firstname: inputData.firstname,
+					lastname:  inputData.lastname,
+					attending: inputData.attending,
+				};
+				return Axios.put( "/attendee", data, { validateStatus: null } );
+			} )
+			.then( response => {
+				console.log( "Form was submitted", response );
+			} );
 	}
 
 	/**

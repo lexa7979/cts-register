@@ -27,11 +27,55 @@ import React from "react";
 import "./App.scss";
 
 import { FormRegister, Logo } from "./components";
+import Axios from "axios";
 
 /**
  * Base component which hosts everything else.
  */
 export class App extends React.Component {
+	/**
+	 * Initialising component
+	 */
+	constructor( props ) {
+		super( props );
+
+		this.state = {
+			serverAvailable: false,
+		};
+	}
+
+	/**
+	 * Actions to take when component is ready
+	 */
+	componentDidMount() {
+		this.checkServerstateTimeout = setTimeout( this.checkServerstate.bind( this ), 3000 );
+	}
+
+	/**
+	 * Actions to take before component will be removed
+	 */
+	componentWillUnmount() {
+		if ( this.checkServerstateTimeout ) {
+			clearTimeout( this.checkServerstateTimeout );
+			this.checkServerstateTimeout = null;
+		}
+	}
+
+	/**
+	 * Checks the connection to the database server;
+	 * will be called on a regular basis.
+	 */
+	checkServerstate() {
+		return Axios.get( "/health" )
+			.then( result => {
+				const serverAvailable = result.status === 200 && result.data === "OK";
+				this.setState( { serverAvailable } );
+			} )
+			.catch( () => {
+				this.setState( { serverAvailable: false } );
+			} );
+	}
+
 	/**
 	 * Composing output
 	 */
@@ -48,7 +92,9 @@ export class App extends React.Component {
 					/>
 				</div>
 				<div className="main">
-					<FormRegister />
+					<FormRegister
+						serverAvailable={this.state.serverAvailable}
+					/>
 				</div>
 				<div className="footer">
 					<Logo
