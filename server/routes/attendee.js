@@ -134,7 +134,7 @@ function handleAppRequest( path ) {
 		try {
 			const attendee = getAttendee( { firstname, lastname } );
 			if ( attendee == null ) {
-				res.status( 200 ).json( { success: false, error: "There is no record with the given content." } );
+				res.status( 200 ).json( { success: false, code: "NOTFOUND", error: "There is no record with the given content." } );
 			} else {
 				res.status( 200 ).json( { success: true, item: attendee } );
 			}

@@ -107,23 +107,26 @@ export class FormRegister extends React.Component {
 			{ validateStatus: null }
 		)
 			.then( response => {
-				switch ( response.status ) {
-				case 200:
-					if ( response.data.attending.toLowerCase() === inputData.attending.toLowerCase() ) {
+				if ( response.status === 200 ) {
+					const { success, item, code } = response.data;
+					if ( success ) {
+						if ( item.attending.toLowerCase() === inputData.attending.toLowerCase() ) {
+							return {
+								actions:  [],
+								messages: { submit: "You answer was already saved, before." },
+							};
+						}
 						return {
-							actions:  [],
-							messages: { submit: "You answer was already saved, before." },
+							actions:  [ "update" ],
+							messages: { submit: "Do you want to change your previous answer?" },
 						};
 					}
-					return {
-						actions:  [ "update" ],
-						messages: { submit: "Do you want to change your previous answer?" },
-					};
-				case 404:
-					return { actions: [ "submit" ], messages: {} };
-				default:
-					return { actions: [], messages: { submit: response.data } };
+					if ( code === "NOTFOUND" ) {
+						return { actions: [ "submit" ], messages: {} };
+					}
 				}
+
+				return { actions: [], messages: { submit: response.data.error || response.data } };
 			} );
 	}
 
