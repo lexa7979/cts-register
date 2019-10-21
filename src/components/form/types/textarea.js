@@ -25,10 +25,12 @@
 import React from "react";
 import assert from "assert";
 
+import { Input } from "reactstrap";
+
 /**
  * Delivers the components for a new multiline text field.
  *
- * @this
+ * @this	{Form}
  *		Expects to be called in the scope of class Form
  *
  * @param	{string}	data.name
@@ -41,11 +43,13 @@ import assert from "assert";
  * 		Optional: Height of the text field (in characters)
  * @param	{null|boolean}	data.focus
  *		Optional: True iff the input field shall be focused initially
+ * @param	{object}	extraAttributes
+ *		Additional attributes to include into opening tag of field
  *
  * @returns	{object}
  *		React component containing the new form input
  */
-export function generateField( data ) {
+export function generateField( data, extraAttributes = {} ) {
 	assert(
 		typeof this.state === "object"
 		&& typeof this.state.inputValues === "object"
@@ -58,7 +62,9 @@ export function generateField( data ) {
 	assert( typeof data.name === "string" && data.name !== "",
 		"Invalid argument \"data.name\"" );
 
-	const allProperties = {
+	const fieldProperties = {
+		...extraAttributes,
+
 		key:         data.name,
 		name:        data.name,
 		value:       this.state.inputValues[data.name] || "",
@@ -67,18 +73,12 @@ export function generateField( data ) {
 		onChange:    this.handleInputChange,
 		className:   "field textarea",
 
-		cols: data.cols,
-		rows: data.rows,
+		type: "textarea",
+		// cols: data.cols,
+		// rows: data.rows,
 	};
 
-	const fieldProperties = {};
-	for ( const key in allProperties ) {
-		if ( allProperties[key] != null ) {
-			fieldProperties[key] = allProperties[key];
-		}
-	}
-
-	return React.createElement( "textarea", fieldProperties );
+	return React.createElement( Input, fieldProperties );
 }
 
 export default {

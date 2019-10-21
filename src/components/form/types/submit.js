@@ -25,10 +25,12 @@
 import React from "react";
 import assert from "assert";
 
+import { Button } from "reactstrap";
+
 /**
  * Delivers the component for a new submit button.
  *
- * @this
+ * @this	{Form}
  *		Expects to be called in the scope of class Form
  *
  * @param	{null|string}	data.name
@@ -37,11 +39,13 @@ import assert from "assert";
  *		Optional: Caption of the submit button
  * @param	{null|boolean}	data.focus
  *		Optional: True iff the input field shall be focused initially
+ * @param	{object}	extraAttributes
+ *		Additional attributes to include into opening tag of field
  *
  * @returns	{object}
  *		React component containing the new form input
  */
-export function generateField( data ) {
+export function generateField( data, extraAttributes = {} ) {
 	assert(
 		typeof this.state === "object"
 		&& Array.isArray( this.state.actions ),
@@ -50,34 +54,36 @@ export function generateField( data ) {
 
 	assert( data !== null && typeof data === "object",
 		"Invalid argument \"data\"" );
-	assert( data.name == null || typeof data.name === "string",
-		"Invalid argument \"data.name\"" );
-	assert( data.value == null || typeof data.value === "string",
-		"Invalid argument \"data.value\"" );
-	assert( data.focus == null || typeof data.focus === "boolean",
-		"Invalid argument \"data.focus\"" );
 
-	const { name = "submit", value = "Submit", focus = false } = data;
+	const { name = "submit", label = "Submit", focus = false } = data;
+	assert( name == null || typeof name === "string",
+		`Invalid field property "name" (${name})` );
+	assert( label == null || typeof label === "string",
+		`Invalid field property "label" (${name}: ${label})` );
+	assert( focus == null || typeof focus === "boolean",
+		`Invalid field property "focus" (${name}: ${focus})` );
 
-	const allProperties = {
+	const disabled = this.state.actions.indexOf( name ) === -1 ? true : null;
+
+	const fieldProperties = {
+		...extraAttributes,
+
 		key:       name,
 		name,
-		value,
+		value:     label,
 		autoFocus: focus ? "autofocus" : null,
-		className: "field submit",
 
-		type:      "submit",
-		disabled:  this.state.actions.indexOf( name ) >= 0 ? null : "disabled",
+		color:     disabled ? null : "primary",
+		disabled,
 	};
 
-	const fieldProperties = {};
-	for ( const key in allProperties ) {
-		if ( allProperties[key] != null ) {
-			fieldProperties[key] = allProperties[key];
+	for ( const key in fieldProperties ) {
+		if ( fieldProperties[key] == null ) {
+			delete fieldProperties[key];
 		}
 	}
 
-	return React.createElement( "input", fieldProperties );
+	return React.createElement( Button, fieldProperties, label );
 }
 
 export default {

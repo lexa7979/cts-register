@@ -22,14 +22,15 @@
  * SOFTWARE.
  */
 
+/* eslint-disable class-methods-use-this */
+
 import assert from "assert";
 
 import React from "react";
 import PropTypes from "prop-types";
+import { Form as ReactstrapForm, FormGroup, Col, Label, FormText } from "reactstrap";
 
 import FormTypes from "./types";
-
-import "./Form.scss";
 
 const propTypes = {
 	fields:       PropTypes.object.isRequired,
@@ -69,8 +70,10 @@ export class Form extends React.Component {
 				);
 				this.fieldList[name] = {
 					...this.props.fields[name],
+
 					name,
 					type,
+					id: `${this.props.formClass || "form"}-${name}`,
 				};
 				this.state.inputValues[name] = value;
 			}
@@ -113,7 +116,12 @@ export class Form extends React.Component {
 
 		return Promise.resolve( this.props.validateData( this.state.inputValues ) )
 			.then( result => {
-				console.log( result );
+				this.validation.progressing = false;
+				if ( this.validation.requested ) {
+					this.validation.requested = false;
+					this.runValidation();
+					return;
+				}
 
 				if (
 					result != null && typeof result === "object"
@@ -122,38 +130,42 @@ export class Form extends React.Component {
 				) {
 					this.setState( { actions: result.actions, messages: result.messages } );
 				}
-
-				this.validation.progressing = false;
-				if ( this.validation.requested ) {
-					this.validation.requested = false;
-					this.runValidation();
-				}
 			} );
 	}
 
 	/**
 	 * Wraps the given input component into a new div-container.
 	 * A label-element will be added if requested.
-	 *
-	 * @param	{string} 	inputName
-	 * @param	{null|string} 	label
-	 * @param	{null|string}	cssClasses
 	 */
-	static labelGenerator( inputName, label, cssClasses ) {
-		assert( typeof inputName === "string" && inputName !== "", "Invalid argument" );
-		assert( label == null || ( typeof label === "string" && label !== "" ), "Invalid argument" );
-		assert( cssClasses == null || typeof cssClasses === "string", "Invliad argument" );
+	labelGenerator( fieldData, extraAttributes = {} ) {
+		assert( fieldData != null && typeof fieldData === "object",
+			"Invalid argument \"fieldData\"" );
 
-		if ( label ) {
-			return <label key={`${inputName}-label`}
-				className={`label ${cssClasses || ""}`}
-				htmlFor={inputName}
-			>{label}</label>;
+		const { name, label, type, id } = fieldData;
+		assert( typeof name === "string" && name !== "",
+			`Invalid field property "name" (${name})` );
+		assert( label == null || ( typeof label === "string" && label !== "" ),
+			`Invalid field property "label" (${name}: ${label})` );
+		assert( typeof type === "string" && type !== "",
+			`Invalid field property "type" (${name}: ${type})` );
+		assert( typeof id === "string" && id !== "",
+			`Invalid field property "id" (${name}: ${id})` );
+
+		const fieldProperties = {
+			...extraAttributes,
+			key:       `${name}-label`,
+			className: `${label ? "label" : "nolabel"} ${type}`,
+		};
+
+		for ( const key in fieldProperties ) {
+			if ( !fieldProperties[key] ) {
+				delete fieldProperties[key];
+			}
 		}
 
-		return <div key={`${inputName}-nolabel`}
-			className={`nolabel ${cssClasses || ""}`}
-		></div>;
+		return label
+			? React.createElement( Label, { ...fieldProperties, for: id }, label )
+			: React.createElement( Col, fieldProperties );
 	}
 
 	/**
@@ -165,13 +177,35 @@ export class Form extends React.Component {
 	messageGenerator( inputName ) {
 		assert( typeof inputName === "string" && inputName !== "", "Invalid argument" );
 
-		if ( !this.state.touched[inputName] || !this.state.messages[inputName] ) {
-			return null;
-		}
+		return ( inputName === "submit" || this.state.touched[inputName] ) && this.state.messages[inputName]
+			? <FormText key={`${inputName}-message`}>{this.state.messages[inputName]}</FormText>
+			: null;
+	}
 
-		return <div	key={`${inputName}-message`} className="message">
-			{this.state.messages[inputName]}
-		</div>;
+	/**
+	 *
+	 * @param	{string}	name
+	 */
+	generateField( name ) {
+		const data = this.fieldList[name];
+		assert( data != null && typeof data === "object",
+			`Invalid argument "name" (${name})` );
+		assert( typeof data.type === "string" && typeof FormTypes[data.type] === "object",
+			`Invalid field type (${data.type})` );
+
+		const id = `${this.props.formClass || "form"}-${data.name}`;
+
+		const label = this.labelGenerator( data, { sm: 3 } );
+		const field = FormTypes[data.type].generateField.call( this, data, { id } );
+		const message = this.messageGenerator( data.name );
+
+		return <FormGroup row key={name}>
+			{label}
+			<Col sm={9}>
+				{field}
+				{message || ""}
+			</Col>
+		</FormGroup>;
 	}
 
 	/**
@@ -184,22 +218,13 @@ export class Form extends React.Component {
 		const { name } = event.target;
 		const value = event.target.type === "checkbox" ? event.target.checked : event.target.value;
 
-		const stateUpdate = {
-			inputValues: {
-				...this.state.inputValues,
-				[name]: value,
-			},
-		};
-
-		if ( this.state.touched[name] !== true ) {
-			stateUpdate.touched = {
-				...this.state.touched,
-				[name]: true,
-			};
-		}
-
-		this.setState( stateUpdate, () => {
-			this.runValidation();
+		this.setState( { inputValues: { ...this.state.inputValues, [name]: value } }, () => {
+			this.runValidation()
+				.then( () => {
+					if ( this.state.touched[name] !== true ) {
+						this.setState( { touched: { ...this.state.touched, [name]: true } } );
+					}
+				} );
 		} );
 	}
 
@@ -222,38 +247,39 @@ export class Form extends React.Component {
 			return <div className="empty-form"></div>;
 		}
 
-		const formFields = [];
+		const formGroups = [];
 		const submitFields = [];
-		for ( const name in this.fieldList ) {	// eslint-disable-line guard-for-in
-			const data = this.fieldList[name];
-			if ( data.type === "submit" ) {
-				submitFields.push( FormTypes.submit.generateField.call( this, data ) );
-			} else if ( typeof FormTypes[data.type] === "object" ) {
-				formFields.push( Form.labelGenerator( data.name, data.label, data.type, data.required ) );
-				formFields.push( FormTypes[data.type].generateField.call( this, data ) );
-			}
-
-			const message = this.messageGenerator( data.name );
-			if ( message ) {
-				formFields.push( message );
+		for ( const name in this.fieldList ) {
+			if ( typeof name === "string" && name !== "" ) {
+				const data = this.fieldList[name];
+				if ( data.type === "submit" ) {
+					submitFields.push( FormTypes.submit.generateField.call( this, data ) );
+				} else {
+					const newField = this.generateField( name );
+					if ( newField != null ) {
+						formGroups.push( newField );
+					}
+				}
 			}
 		}
 
 		if ( submitFields.length === 0 ) {
 			submitFields.push( FormTypes.submit.generateField.call( this, { value: "Submit" } ) );
 		}
+		const submitMessage = this.messageGenerator( "submit" );
 
-		return <form
+		return <ReactstrapForm
 			className={this.props.formClass ? `form ${this.props.formClass}` : "form"}
 			onSubmit={this.onSubmit}
 		>
-			<div className="fields">
-				{formFields}
-			</div>
-			<div className="final">
-				{submitFields}
-			</div>
-		</form>;
+			{formGroups}
+			<FormGroup row>
+				<Col sm={{ size: 9, offset: 3 }}>
+					{submitFields}
+					{submitMessage}
+				</Col>
+			</FormGroup>
+		</ReactstrapForm>;
 	}
 }
 

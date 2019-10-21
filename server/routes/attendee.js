@@ -113,11 +113,11 @@ function listAttendees() {
 /**
  * Handles GET-requests to manage the attendees of an event
  *
+ * @this	{Application}
+ *		Function is expected to be called in the scope of to the Express app
+ *
  * @param	{string}	path
  *		Base URL the server uses for this service
- *
- * @this	{object}
- *		Function is expected to be bound to the Express app
  */
 function handleAppRequest( path ) {
 	this.get( path, ( req, res ) => {
@@ -146,7 +146,7 @@ function handleAppRequest( path ) {
 	this.put( path, ( req, res ) => {
 		const { firstname, lastname, attending } = req.body;
 		try {
-			const result = saveAttendee( { firstname, lastname, attending } );
+			const result = saveAttendee( { firstname, lastname, attending }, "overwrite" );
 			res.status( 200 ).json( result );
 		} catch ( error ) {
 			res.status( 400 ).json( { error: error.message } );

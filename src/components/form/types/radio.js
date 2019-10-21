@@ -25,24 +25,28 @@
 import React from "react";
 import assert from "assert";
 
+import { Col, FormGroup, Label, Input } from "reactstrap";
+
 /**
  * Delivers the components for a new group of radio buttons.
  *
- * @this
+ * @this	{Form}
  *		Expects to be called in the scope of class Form
  *
  * @param	{string}	data.name
  *		Internal name of the input field, must be unique within form.
  * @param	{string[]}	data.options
  *		List of selectable alternatives for the radio button group
+ * @param	{object}	extraAttributes
+ *		Additional attributes to include into opening tag of field
  *
  * @returns	{object}
  *		React component containing the new form input
  */
-export function generateField( data ) {
+export function generateField( data, extraAttributes = {} ) {
 	assert(
 		typeof this.state === "object"
-		// && typeof this.state.inputValues === "object"
+		&& typeof this.state.inputValues === "object"
 		&& typeof this.handleInputChange === "function",
 		"Missing access to class Form"
 	);
@@ -50,22 +54,28 @@ export function generateField( data ) {
 	assert( data !== null && typeof data === "object",
 		"Invalid argument \"data\"" );
 
+	const { name, options } = data;
+	assert( typeof name === "string" && name !== "",
+		`Invalid field property "name" (${name})` );
+	assert( Array.isArray( options ) && options.length > 0,
+		`Invalid field property "options" (${name}: ${options})` );
+
 	const buttonList = [];
 	for ( let index = 0; index < data.options.length; index++ ) {
-		const id = `${data.name}-radio-${index + 1}`;
-		buttonList.push( <div key={id}>
-			<input
-				type="radio"
-				id={id}
-				name={data.name}
-				value={data.options[index]}
-				onChange={this.handleInputChange}
-			/>
-			<label htmlFor={id}>{data.options[index]}</label>
-		</div> );
+		buttonList.push( <FormGroup check key={index}>
+			<Label check>
+				<Input
+					type="radio"
+					name={data.name}
+					value={data.options[index]}
+					onChange={this.handleInputChange}
+				/>{" "}
+				{data.options[index]}
+			</Label>
+		</FormGroup> );
 	}
 
-	return <div key={data.name} className="field radio">{buttonList}</div>;
+	return React.createElement( Col, { ...extraAttributes, className: "radio" }, buttonList );
 }
 
 export default {

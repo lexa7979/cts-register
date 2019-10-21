@@ -26,7 +26,9 @@ import React from "react";
 import ReactDOM from "react-dom";
 
 import "./reset.css";
+import "bootstrap/dist/css/bootstrap.css";
 import "./index.scss";
+
 import App from "./App";
 
 import * as serviceWorker from "./serviceWorker";

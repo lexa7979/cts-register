@@ -25,23 +25,28 @@
 import React from "react";
 import assert from "assert";
 
+import { Input } from "reactstrap";
+
 /**
  * Delivers the components for a new text field.
  *
- * @this
+ * @this	{Form}
  *		Expects to be called in the scope of class Form
  *
+ * @param	{object}	data
  * @param	{string}	data.name
  *		Internal name of the input field, must be unique within form.
  * @param	{null|string}	data.placeholder
  *		Optional: Hint to show as long as input field is empty
  * @param	{null|boolean}	data.focus
  *		Optional: True iff the input field shall be focused initially
+ * @param	{object}	extraAttributes
+ *		Additional attributes to include into opening tag of field
  *
  * @returns	{object}
  *		React component containing the new form input
  */
-export function generateField( data ) {
+export function generateField( data, extraAttributes = {} ) {
 	assert(
 		typeof this.state === "object"
 		&& typeof this.state.inputValues === "object"
@@ -58,10 +63,19 @@ export function generateField( data ) {
 	assert( data.focus == null || typeof data.focus === "boolean",
 		"Invalid argument \"data.focus\"" );
 
-	const allProperties = {
+	let state = null;
+	if ( this.state.touched && this.state.touched[data.name] === true ) {
+		state = this.state.messages && this.state.messages[data.name] ? "invalid" : "valid";
+	}
+
+	const fieldProperties = {
+		...extraAttributes,
+
 		key:         data.name,
 		name:        data.name,
 		value:       this.state.inputValues[data.name] || "",
+		valid:       state === "valid",
+		invalid:     state === "invalid",
 		placeholder: data.placeholder,
 		autoFocus:   data.focus ? "autofocus" : null,
 		onChange:    this.handleInputChange,
@@ -70,14 +84,7 @@ export function generateField( data ) {
 		type: "text",
 	};
 
-	const fieldProperties = {};
-	for ( const key in allProperties ) {
-		if ( allProperties[key] != null ) {
-			fieldProperties[key] = allProperties[key];
-		}
-	}
-
-	return React.createElement( "input", fieldProperties );
+	return React.createElement( Input, fieldProperties );
 }
 
 export default {
