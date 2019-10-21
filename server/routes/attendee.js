@@ -30,8 +30,13 @@ const data = [
 ];
 
 /**
+ * Looks for the given recordset
  *
- * @param {*} record
+ * @param	{object}	record
+ * @param	{string}	record.firstname
+ * @param	{string}	record.lastname
+ *
+ * @returns	{null|object}
  */
 function getAttendee( record ) {
 	for ( let index = 0; index < data.length; index++ ) {
@@ -44,8 +49,23 @@ function getAttendee( record ) {
 }
 
 /**
+ * Stores a new recordset (in memory)
  *
- * @param {*} record
+ * @param	{object}	record
+ * @param	{string}	record.firstname
+ * @param	{string}	record.lastname
+ * @param	{string}	record.attending
+ *
+ * @param	{string}	handleConflicts
+ *		How shall we react in case that there already is a recordset related to the given person?
+ *		- "error", if you want an error to be thrown
+ *		- "overwrite", if you want the old data to be discarded
+ *		- "skip", if you want the new data to be discarded
+ *
+ * @returns	{object}
+ *		Data of the stored recordset
+ *
+ * @throws
  */
 function saveAttendee( record, handleConflicts = "error" ) {
 	assert( record != null && typeof record === "object",
@@ -56,7 +76,6 @@ function saveAttendee( record, handleConflicts = "error" ) {
 	} );
 
 	const check = getAttendee( record );
-
 	if ( check == null ) {
 		const id = data.reduce( ( result, item ) => Math.max( item.id, result ), 0 ) + 1;
 		const item = { ...record, id };
@@ -83,7 +102,9 @@ function saveAttendee( record, handleConflicts = "error" ) {
 }
 
 /**
+ * Determines a list of all stored recordsets
  *
+ * @returns	{object[]}
  */
 function listAttendees() {
 	return data;
@@ -95,13 +116,14 @@ function listAttendees() {
  * @param	{string}	path
  *		Base URL the server uses for this service
  *
- * @this
+ * @this	{object}
+ *		Function is expected to be bound to the Express app
  */
 function handleAppRequest( path ) {
 	this.get( path, ( req, res ) => {
 		try {
 			const recordList = listAttendees();
-			res.status( 200 ).json( { items: recordList, count: recordList.length } );
+			res.status( 200 ).json( { count: recordList.length, items: recordList } );
 		} catch ( error ) {
 			res.status( 500 ).json( { error: error.message } );
 		}
@@ -112,9 +134,9 @@ function handleAppRequest( path ) {
 		try {
 			const attendee = getAttendee( { firstname, lastname } );
 			if ( attendee == null ) {
-				res.status( 404 ).json( { error: "There is no record with the given content." } );
+				res.status( 200 ).json( { success: false, error: "There is no record with the given content." } );
 			} else {
-				res.status( 200 ).json( attendee );
+				res.status( 200 ).json( { success: true, item: attendee } );
 			}
 		} catch ( error ) {
 			res.status( 500 ).json( { error: error.message } );
