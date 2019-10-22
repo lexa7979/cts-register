@@ -4,7 +4,7 @@
 	"description": "Basic database backend to serve my example React.js app",
 	"main": "app.js",
 	"scripts": {
-		"express:start": "node app.js"
+		"start": "node app.js"
 	},
 	"author": "alexander.urban@cygni.se",
 	"license": "MIT",
