@@ -28,9 +28,9 @@ import assert from "assert";
 
 import React from "react";
 import PropTypes from "prop-types";
-import { Form as ReactstrapForm, FormGroup, Col, Label, FormText } from "reactstrap";
+import { Form, FormGroup, Col, Label, FormText } from "reactstrap";
 
-import FormTypes from "./types";
+import FieldTypes from "./field-types";
 
 const propTypes = {
 	fields:       PropTypes.object.isRequired,
@@ -44,7 +44,7 @@ const defaultProps = {};
 /**
  * Component which contains an input form
  */
-export class Form extends React.Component {
+export class FormGenerator extends React.Component {
 	/**
 	 * Initialising component
 	 */
@@ -63,9 +63,9 @@ export class Form extends React.Component {
 			if ( typeof name === "string" && name !== "" ) {
 				const { type = "input", value = "" } = this.props.fields[name];
 				assert(
-					FormTypes[type] != null
-					&& typeof FormTypes[type] === "object"
-					&& typeof FormTypes[type].generateField === "function",
+					FieldTypes[type] != null
+					&& typeof FieldTypes[type] === "object"
+					&& typeof FieldTypes[type].generateField === "function",
 					`Unsupported field type "${type}" (${name})`
 				);
 				this.fieldList[name] = {
@@ -190,13 +190,13 @@ export class Form extends React.Component {
 		const data = this.fieldList[name];
 		assert( data != null && typeof data === "object",
 			`Invalid argument "name" (${name})` );
-		assert( typeof data.type === "string" && typeof FormTypes[data.type] === "object",
+		assert( typeof data.type === "string" && typeof FieldTypes[data.type] === "object",
 			`Invalid field type (${data.type})` );
 
 		const id = `${this.props.formClass || "form"}-${data.name}`;
 
 		const label = this.labelGenerator( data, { sm: 3 } );
-		const field = FormTypes[data.type].generateField.call( this, data, { id } );
+		const field = FieldTypes[data.type].generateField.call( this, data, { id } );
 		const message = this.messageGenerator( data.name );
 
 		return <FormGroup row key={name}>
@@ -253,7 +253,7 @@ export class Form extends React.Component {
 			if ( typeof name === "string" && name !== "" ) {
 				const data = this.fieldList[name];
 				if ( data.type === "submit" ) {
-					submitFields.push( FormTypes.submit.generateField.call( this, data ) );
+					submitFields.push( FieldTypes.submit.generateField.call( this, data ) );
 				} else {
 					const newField = this.generateField( name );
 					if ( newField != null ) {
@@ -264,11 +264,11 @@ export class Form extends React.Component {
 		}
 
 		if ( submitFields.length === 0 ) {
-			submitFields.push( FormTypes.submit.generateField.call( this, { value: "Submit" } ) );
+			submitFields.push( FieldTypes.submit.generateField.call( this, { value: "Submit" } ) );
 		}
 		const submitMessage = this.messageGenerator( "submit" );
 
-		return <ReactstrapForm
+		return <Form
 			className={this.props.formClass ? `form ${this.props.formClass}` : "form"}
 			onSubmit={this.onSubmit}
 		>
@@ -279,11 +279,11 @@ export class Form extends React.Component {
 					{submitMessage}
 				</Col>
 			</FormGroup>
-		</ReactstrapForm>;
+		</Form>;
 	}
 }
 
-Form.propTypes = propTypes;
-Form.defaultProps = defaultProps;
+FormGenerator.propTypes = propTypes;
+FormGenerator.defaultProps = defaultProps;
 
-export default Form;
+export default FormGenerator;

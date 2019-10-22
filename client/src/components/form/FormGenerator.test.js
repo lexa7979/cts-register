@@ -29,14 +29,14 @@ import ReactDOM from "react-dom";
 
 import { shallow } from "enzyme";
 
-import Form from "./Form";
+import FormGenerator from "./FormGenerator";
 
 describe( "Helper component Form -", () => {
 	describe( "when rendering", () => {
 		it( "with no properties - FAILS", () => {
 			const div = document.createElement( "div" );
 			expect( () => {
-				ReactDOM.render( <Form />, div );
+				ReactDOM.render( <FormGenerator />, div );
 			} ).toSucceedWithMessages();
 			ReactDOM.unmountComponentAtNode( div );
 		} );
@@ -44,16 +44,16 @@ describe( "Helper component Form -", () => {
 		it( "with minimal properties - succeeds", () => {
 			const div = document.createElement( "div" );
 			expect( () => {
-				ReactDOM.render( <Form fields={{}} handleSubmit={() => null} />, div );
+				ReactDOM.render( <FormGenerator fields={{}} handleSubmit={() => null} />, div );
 			} ).toSucceedWithoutMessages();
 			ReactDOM.unmountComponentAtNode( div );
 		} );
 
 		it( "with minimal properties - delivers expected result  (-> check snapshot)", () => {
 			// eslint-disable-next-line quotes
-			const testString = `<Form fields={{}} handleSubmit={() => null} />`;
-			const testElement = <Form fields={{}} handleSubmit={() => null} />;
-			const filename = "Form";
+			const testString = `<FormGenerator fields={{}} handleSubmit={() => null} />`;
+			const testElement = <FormGenerator fields={{}} handleSubmit={() => null} />;
+			const filename = "FormGenerator";
 
 			const component = shallow( testElement );
 			expect( component.exists() ).toBe( true );
@@ -64,9 +64,9 @@ describe( "Helper component Form -", () => {
 
 		it( "with one input field - delivers expected result  (-> check snapshot)", () => {
 			// eslint-disable-next-line quotes
-			const testString = `<Form fields={{ text: { type: "input" } }} handleSubmit={() => null} />`;
-			const testElement = <Form fields={{ text: { type: "input" } }} handleSubmit={() => null} />;
-			const filename = "Form-input";
+			const testString = `<FormGenerator fields={{ text: { type: "input" } }} handleSubmit={() => null} />`;
+			const testElement = <FormGenerator fields={{ text: { type: "input" } }} handleSubmit={() => null} />;
+			const filename = "FormGenerator-input";
 
 			const component = shallow( testElement );
 			expect( component.exists() ).toBe( true );
@@ -77,9 +77,9 @@ describe( "Helper component Form -", () => {
 
 		it( "with a set of input fields - delivers expected result  (-> check snapshot)", () => {
 			// eslint-disable-next-line quotes
-			const testString = `<Form fields={{ first: { type: "input" }, second: { label: "second" }, third: {} }} handleSubmit={() => null} />`;
-			const testElement = <Form fields={{ first: { type: "input" }, second: { label: "second" }, third: {} }} handleSubmit={() => null} />;
-			const filename = "Form-input-set";
+			const testString = `<FormGenerator fields={{ first: { type: "input" }, second: { label: "second" }, third: {} }} handleSubmit={() => null} />`;
+			const testElement = <FormGenerator fields={{ first: { type: "input" }, second: { label: "second" }, third: {} }} handleSubmit={() => null} />;
+			const filename = "FormGenerator-input-set";
 
 			const component = shallow( testElement );
 			expect( component.exists() ).toBe( true );
@@ -90,9 +90,9 @@ describe( "Helper component Form -", () => {
 
 		it( "with one textarea field - delivers expected result  (-> check snapshot)", () => {
 			// eslint-disable-next-line quotes
-			const testString = `<Form fields={{ text: { type: "textarea" } }} handleSubmit={() => null} />`;
-			const testElement = <Form fields={{ text: { type: "textarea" } }} handleSubmit={() => null} />;
-			const filename = "Form-textarea";
+			const testString = `<FormGenerator fields={{ text: { type: "textarea" } }} handleSubmit={() => null} />`;
+			const testElement = <FormGenerator fields={{ text: { type: "textarea" } }} handleSubmit={() => null} />;
+			const filename = "FormGenerator-textarea";
 
 			const component = shallow( testElement );
 			expect( component.exists() ).toBe( true );
@@ -103,9 +103,9 @@ describe( "Helper component Form -", () => {
 
 		it( "with a set of textarea fields - delivers expected result  (-> check snapshot)", () => {
 			// eslint-disable-next-line quotes
-			const testString = `<Form fields={{ first: { type: "textarea" }, second: { type: "textarea", rows: 4, cols: 50, value: "Text input", label: "second" }, third: { type: "textarea", label: "third" } }} handleSubmit={() => null} />`;
-			const testElement = <Form fields={{ first: { type: "textarea" }, second: { type: "textarea", rows: 4, cols: 50, value: "Text input", label: "second" }, third: { type: "textarea", label: "third" } }} handleSubmit={() => null} />;
-			const filename = "Form-textarea-set";
+			const testString = `<FormGenerator fields={{ first: { type: "textarea" }, second: { type: "textarea", rows: 4, cols: 50, value: "Text input", label: "second" }, third: { type: "textarea", label: "third" } }} handleSubmit={() => null} />`;
+			const testElement = <FormGenerator fields={{ first: { type: "textarea" }, second: { type: "textarea", rows: 4, cols: 50, value: "Text input", label: "second" }, third: { type: "textarea", label: "third" } }} handleSubmit={() => null} />;
+			const filename = "FormGenerator-textarea-set";
 
 			const component = shallow( testElement );
 			expect( component.exists() ).toBe( true );
@@ -116,9 +116,9 @@ describe( "Helper component Form -", () => {
 
 		it( "with one radio button group - delivers expected result  (-> check snapshot)", () => {
 			// eslint-disable-next-line quotes
-			const testString = `<Form fields={{ choose: { type: "radio", options: [ "one", "two", "three" ] } }} handleSubmit={() => null} />`;
-			const testElement = <Form fields={{ choose: { type: "radio", options: [ "one", "two", "three" ] } }} handleSubmit={() => null} />;
-			const filename = "Form-radio";
+			const testString = `<FormGenerator fields={{ choose: { type: "radio", options: [ "one", "two", "three" ] } }} handleSubmit={() => null} />`;
+			const testElement = <FormGenerator fields={{ choose: { type: "radio", options: [ "one", "two", "three" ] } }} handleSubmit={() => null} />;
+			const filename = "FormGenerator-radio";
 
 			const component = shallow( testElement );
 			expect( component.exists() ).toBe( true );

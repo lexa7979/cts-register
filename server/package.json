@@ -1,21 +1,14 @@
 {
 	"name": "cts-next-gen-server",
 	"version": "0.1.0",
-	"description": "",
+	"description": "Basic database backend to serve my example React.js app",
 	"main": "app.js",
 	"scripts": {
-		"express:start": "node app.js",
-		"db:docker:start": "docker-compose up -d",
-		"db:docker:ps": "docker-compose ps",
-		"db:docker:logs": "docker-compose logs -f -t",
-		"db:docker:inspect": "docker-compose exec database /bin/sh -c \"cd /data/db; /bin/bash\"",
-		"db:docker:stop": "docker-compose down",
-		"db:docker:clear": "docker-compose down -v"
+		"express:start": "node app.js"
 	},
 	"author": "alexander.urban@cygni.se",
 	"license": "MIT",
 	"dependencies": {
-		"express": "^4.17.1",
-		"mongodb": "^3.3.3"
+		"express": "^4.17.1"
 	}
 }

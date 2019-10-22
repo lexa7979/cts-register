@@ -30,7 +30,7 @@ import Axios from "axios";
 
 import assert from "assert";
 
-import { Form } from "./form";
+import { FormGenerator } from "./form";
 
 const propTypes = {
 	serverAvailable: PropTypes.bool,
@@ -147,6 +147,7 @@ export class FormRegister extends React.Component {
 				return Axios.put( "/attendee", data, { validateStatus: null } );
 			} )
 			.then( response => {
+				// eslint-disable-next-line no-console
 				console.log( "Form was submitted", response );
 			} );
 	}
@@ -155,7 +156,7 @@ export class FormRegister extends React.Component {
 	 * Composing output
 	 */
 	render() {
-		return <Form
+		return <FormGenerator
 			formClass="register"
 			fields={this.formFields}
 			handleSubmit={this.handleSubmit}
