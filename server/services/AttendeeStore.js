@@ -61,9 +61,7 @@ class AttendeeStore {
 	 *
 	 * @param	{object}	record
 	 * @param	{string}	record.firstname
-	 *		First name of the stored attendee
 	 * @param	{string}	record.lastname
-	 *		Last name of the stored attendee
 	 *
 	 * @returns	{null|object}
 	 *		Complete recordset of the stored attendee; or
@@ -119,7 +117,7 @@ class AttendeeStore {
 				`Invalid argument "record.${key}" (${record[key]})` );
 		} );
 
-		const check = this.getAttendee( record );
+		const check = this.getItem( record );
 		if ( check == null ) {
 			const id = this.data.reduce( ( result, item ) => Math.max( item.id, result ), 0 ) + 1;
 			const item = { ...record, id };
