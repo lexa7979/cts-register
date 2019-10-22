@@ -1,14 +1,10 @@
 {
 	"name": "cts-next-gen",
 	"version": "0.1.0",
-	"private": true,
+	"description": "Example React.js app showing input form to register attendees to a conference",
 	"dependencies": {},
 	"scripts": {
-		"lint": "eslint **/*.js",
-		"local-link:eslint": "npm link @lexa79/eslint-config"
-	},
-	"eslintConfig": {
-		"extends": "react-app"
+		"lint": "eslint **/*.js"
 	},
 	"browserslist": {
 		"production": [
