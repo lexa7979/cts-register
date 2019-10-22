@@ -79,7 +79,6 @@ export function generateField( data, extraAttributes = {} ) {
 		placeholder: data.placeholder,
 		autoFocus:   data.focus ? "autofocus" : null,
 		onChange:    this.handleInputChange,
-		className:   "field input",
 
 		type: "text",
 	};

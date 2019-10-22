@@ -22,15 +22,18 @@
  * SOFTWARE.
  */
 
-// Configure Enzyme:
 import { configure } from "enzyme";
 import Adapter from "enzyme-adapter-react-16";
+
+import { createSerializer } from "enzyme-to-json";
+
+import MyMatchers from "@lexa79/jest-matchers";
+
+// Configure Enzyme:
 configure( { adapter: new Adapter() } );
 
 // Enable Enzyme to be used with Jest's snapshots:
-import { createSerializer } from "enzyme-to-json";
 expect.addSnapshotSerializer( createSerializer( { mode: "deep" } ) );
 
 // Add some useful matchers to Jest:
-import MyMatchers from "@lexa79/jest-matchers";
 expect.extend( MyMatchers );

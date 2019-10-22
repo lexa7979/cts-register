@@ -1,0 +1,66 @@
+
+<!DOCTYPE html>
+<html style="height: 100%;">
+  <head>
+  </head>
+  <body style="display: flex; flex-flow: column nowrap; justify-content: center; align-items: center; height: 100%;">
+    <h2>
+      Helper component Form - when rendering with one radio button group - delivers expected result  (-> check snapshot)
+    </h2>
+    <form class="form">
+      <div class="row form-group">
+        <div class="nolabel radio col-sm-3">
+        </div>
+        <div class="col-sm-9">
+          <div id="form-choose"
+               class="col"
+          >
+            <div class="form-check">
+              <label class="form-check-label">
+                <input type="radio"
+                       name="choose"
+                       value="one"
+                       class="form-check-input"
+                >
+                one
+              </label>
+            </div>
+            <div class="form-check">
+              <label class="form-check-label">
+                <input type="radio"
+                       name="choose"
+                       value="two"
+                       class="form-check-input"
+                >
+                two
+              </label>
+            </div>
+            <div class="form-check">
+              <label class="form-check-label">
+                <input type="radio"
+                       name="choose"
+                       value="three"
+                       class="form-check-input"
+                >
+                three
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row form-group">
+        <div class="col-sm-9 offset-sm-3">
+          <button name="submit"
+                  value="Submit"
+                  class="btn btn-primary"
+          >
+            Submit
+          </button>
+        </div>
+      </div>
+    </form>
+    <br>
+    <br>
+    &lt;FormGenerator fields={{ choose: { type: "radio", options: [ "one", "two", "three" ] } }} handleSubmit={() =&gt; null} />
+  </body>
+</html>

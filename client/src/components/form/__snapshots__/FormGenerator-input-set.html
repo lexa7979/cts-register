@@ -1,0 +1,65 @@
+
+<!DOCTYPE html>
+<html style="height: 100%;">
+  <head>
+  </head>
+  <body style="display: flex; flex-flow: column nowrap; justify-content: center; align-items: center; height: 100%;">
+    <h2>
+      Helper component Form - when rendering with a set of input fields - delivers expected result  (-> check snapshot)
+    </h2>
+    <form class="form">
+      <div class="row form-group">
+        <div class="nolabel input col-sm-3">
+        </div>
+        <div class="col-sm-9">
+          <input type="text"
+                 id="form-first"
+                 name="first"
+                 value
+                 class="form-control"
+          >
+        </div>
+      </div>
+      <div class="row form-group">
+        <label for="form-second"
+               class="label input col-sm-3 col-form-label"
+        >
+          second
+        </label>
+        <div class="col-sm-9">
+          <input type="text"
+                 id="form-second"
+                 name="second"
+                 value
+                 class="form-control"
+          >
+        </div>
+      </div>
+      <div class="row form-group">
+        <div class="nolabel input col-sm-3">
+        </div>
+        <div class="col-sm-9">
+          <input type="text"
+                 id="form-third"
+                 name="third"
+                 value
+                 class="form-control"
+          >
+        </div>
+      </div>
+      <div class="row form-group">
+        <div class="col-sm-9 offset-sm-3">
+          <button name="submit"
+                  value="Submit"
+                  class="btn btn-primary"
+          >
+            Submit
+          </button>
+        </div>
+      </div>
+    </form>
+    <br>
+    <br>
+    &lt;FormGenerator fields={{ first: { type: "input" }, second: { label: "second" }, third: {} }} handleSubmit={() =&gt; null} />
+  </body>
+</html>

@@ -21,9 +21,6 @@
 		"test:update": "react-scripts test -u",
 		"eject": "react-scripts eject"
 	},
-	"eslintConfig": {
-		"extends": "react-app"
-	},
 	"browserslist": {
 		"production": [
 			">0.2%",

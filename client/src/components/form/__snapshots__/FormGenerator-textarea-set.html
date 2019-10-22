@@ -1,0 +1,66 @@
+
+<!DOCTYPE html>
+<html style="height: 100%;">
+  <head>
+  </head>
+  <body style="display: flex; flex-flow: column nowrap; justify-content: center; align-items: center; height: 100%;">
+    <h2>
+      Helper component Form - when rendering with a set of textarea fields - delivers expected result  (-> check snapshot)
+    </h2>
+    <form class="form">
+      <div class="row form-group">
+        <div class="nolabel textarea col-sm-3">
+        </div>
+        <div class="col-sm-9">
+          <textarea id="form-first"
+                    name="first"
+                    class="form-control"
+          >
+          </textarea>
+        </div>
+      </div>
+      <div class="row form-group">
+        <label for="form-second"
+               class="label textarea col-sm-3 col-form-label"
+        >
+          second
+        </label>
+        <div class="col-sm-9">
+          <textarea id="form-second"
+                    name="second"
+                    class="form-control"
+          >
+            Text input
+          </textarea>
+        </div>
+      </div>
+      <div class="row form-group">
+        <label for="form-third"
+               class="label textarea col-sm-3 col-form-label"
+        >
+          third
+        </label>
+        <div class="col-sm-9">
+          <textarea id="form-third"
+                    name="third"
+                    class="form-control"
+          >
+          </textarea>
+        </div>
+      </div>
+      <div class="row form-group">
+        <div class="col-sm-9 offset-sm-3">
+          <button name="submit"
+                  value="Submit"
+                  class="btn btn-primary"
+          >
+            Submit
+          </button>
+        </div>
+      </div>
+    </form>
+    <br>
+    <br>
+    &lt;FormGenerator fields={{ first: { type: "textarea" }, second: { type: "textarea", value: "Text input", label: "second" }, third: { type: "textarea", label: "third" } }} handleSubmit={() =&gt; null} />
+  </body>
+</html>

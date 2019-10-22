@@ -55,7 +55,7 @@ export class FormGenerator extends React.Component {
 			inputValues: {},
 			touched:     {},
 			messages:    {},
-			actions:     [],
+			actions:     [ "submit" ],
 		};
 
 		this.fieldList = [];
@@ -84,6 +84,8 @@ export class FormGenerator extends React.Component {
 			requested:   false,
 		};
 
+		this.mounted = false;
+
 		this.handleInputChange = this.handleInputChange.bind( this );
 		this.onSubmit = this.onSubmit.bind( this );
 	}
@@ -92,7 +94,15 @@ export class FormGenerator extends React.Component {
 	 * Actions to take when component is ready
 	 */
 	componentDidMount() {
+		this.mounted = true;
 		this.runValidation();
+	}
+
+	/**
+	 * Actions to take before component will be removed
+	 */
+	componentWillUnmount() {
+		this.mounted = false;
 	}
 
 	/**
@@ -104,7 +114,7 @@ export class FormGenerator extends React.Component {
 	 * has finished.
 	 */
 	runValidation() {
-		if ( typeof this.props.validateData !== "function" ) {
+		if ( typeof this.props.validateData !== "function" || !this.mounted ) {
 			return Promise.resolve();
 		}
 
@@ -124,7 +134,8 @@ export class FormGenerator extends React.Component {
 				}
 
 				if (
-					result != null && typeof result === "object"
+					this.mounted
+					&& result != null && typeof result === "object"
 					&& Array.isArray( result.actions )
 					&& result.messages != null && typeof result.messages === "object"
 				) {

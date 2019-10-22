@@ -8,73 +8,98 @@
       Component FormRegister - when rendering with no properties - delivers expected result  (-> check snapshot, too)
     </h2>
     <form class="form register">
-      <div class="fields">
-        <label class="label input"
-               for="firstname"
+      <div class="row form-group">
+        <label for="register-firstname"
+               class="label input col-sm-3 col-form-label"
         >
           Firstname:
         </label>
-        <input type="text"
-               name="firstname"
-               value
-               placeholder="Type in your firstname."
-               class="field input"
-        >
-        <label class="label input"
-               for="lastname"
+        <div class="col-sm-9">
+          <input type="text"
+                 id="register-firstname"
+                 name="firstname"
+                 value
+                 placeholder="Type in your firstname."
+                 autofocus
+                 class="form-control"
+          >
+        </div>
+      </div>
+      <div class="row form-group">
+        <label for="register-lastname"
+               class="label input col-sm-3 col-form-label"
         >
           Lastname:
         </label>
-        <input type="text"
-               name="lastname"
-               value
-               placeholder="Type in your lastname."
-               class="field input"
+        <div class="col-sm-9">
+          <input type="text"
+                 id="register-lastname"
+                 name="lastname"
+                 value
+                 placeholder="Type in your lastname."
+                 class="form-control"
+          >
+        </div>
+      </div>
+      <div class="row form-group">
+        <label for="register-attending"
+               class="label radio col-sm-3 col-form-label"
         >
-        <label class="label radio"
-               for="attending"
-        >
-          Will you attend the conference?
+          Are you going to attend the conference?
         </label>
-        <div class="field radio">
-          <div>
-            <input type="radio"
-                   id="attending-radio-1"
-                   name="attending"
-                   value="yes"
-            >
-            <label for="attending-radio-1">
-              yes
-            </label>
-          </div>
-          <div>
-            <input type="radio"
-                   id="attending-radio-2"
-                   name="attending"
-                   value="no"
-            >
-            <label for="attending-radio-2">
-              no
-            </label>
-          </div>
-          <div>
-            <input type="radio"
-                   id="attending-radio-3"
-                   name="attending"
-                   value="maybe"
-            >
-            <label for="attending-radio-3">
-              maybe
-            </label>
+        <div class="col-sm-9">
+          <div id="register-attending"
+               class="col"
+          >
+            <div class="form-check">
+              <label class="form-check-label">
+                <input type="radio"
+                       name="attending"
+                       value="Yes"
+                       class="form-check-input"
+                >
+                Yes
+              </label>
+            </div>
+            <div class="form-check">
+              <label class="form-check-label">
+                <input type="radio"
+                       name="attending"
+                       value="No"
+                       class="form-check-input"
+                >
+                No
+              </label>
+            </div>
+            <div class="form-check">
+              <label class="form-check-label">
+                <input type="radio"
+                       name="attending"
+                       value="Maybe"
+                       class="form-check-input"
+                >
+                Maybe
+              </label>
+            </div>
           </div>
         </div>
       </div>
-      <div class="final">
-        <input type="submit"
-               name="submit"
-               value="Submit"
-               class="field submit"
-        >
+      <div class="row form-group">
+        <div class="col-sm-9 offset-sm-3">
+          <button name="submit"
+                  value="Submit"
+                  class="btn btn-primary"
+          >
+            Submit
+          </button>
+          <button name="update"
+                  value="Update"
+                  disabled
+                  class="btn btn-secondary disabled"
+          >
+            Update
+          </button>
+        </div>
       </div>
     </form>
     <br>

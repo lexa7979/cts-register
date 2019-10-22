@@ -75,7 +75,7 @@ export function generateField( data, extraAttributes = {} ) {
 		</FormGroup> );
 	}
 
-	return React.createElement( Col, { ...extraAttributes, className: "radio" }, buttonList );
+	return React.createElement( Col, extraAttributes, buttonList );
 }
 
 export default {

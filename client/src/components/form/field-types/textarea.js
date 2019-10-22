@@ -71,11 +71,8 @@ export function generateField( data, extraAttributes = {} ) {
 		placeholder: data.placeholder,
 		autoFocus:   data.focus ? "autofocus" : null,
 		onChange:    this.handleInputChange,
-		className:   "field textarea",
 
 		type: "textarea",
-		// cols: data.cols,
-		// rows: data.rows,
 	};
 
 	return React.createElement( Input, fieldProperties );

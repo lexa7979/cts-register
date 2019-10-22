@@ -103,8 +103,8 @@ describe( "Helper component Form -", () => {
 
 		it( "with a set of textarea fields - delivers expected result  (-> check snapshot)", () => {
 			// eslint-disable-next-line quotes
-			const testString = `<FormGenerator fields={{ first: { type: "textarea" }, second: { type: "textarea", rows: 4, cols: 50, value: "Text input", label: "second" }, third: { type: "textarea", label: "third" } }} handleSubmit={() => null} />`;
-			const testElement = <FormGenerator fields={{ first: { type: "textarea" }, second: { type: "textarea", rows: 4, cols: 50, value: "Text input", label: "second" }, third: { type: "textarea", label: "third" } }} handleSubmit={() => null} />;
+			const testString = `<FormGenerator fields={{ first: { type: "textarea" }, second: { type: "textarea", value: "Text input", label: "second" }, third: { type: "textarea", label: "third" } }} handleSubmit={() => null} />`;
+			const testElement = <FormGenerator fields={{ first: { type: "textarea" }, second: { type: "textarea", value: "Text input", label: "second" }, third: { type: "textarea", label: "third" } }} handleSubmit={() => null} />;
 			const filename = "FormGenerator-textarea-set";
 
 			const component = shallow( testElement );
