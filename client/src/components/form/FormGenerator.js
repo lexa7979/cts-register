@@ -28,7 +28,7 @@ import assert from "assert";
 
 import React from "react";
 import PropTypes from "prop-types";
-import { Form, FormGroup, Col, Label, FormText } from "reactstrap";
+import { Alert, Form, FormGroup, Col, Label, FormText } from "reactstrap";
 
 import FieldTypes from "./field-types";
 
@@ -41,6 +41,14 @@ const propTypes = {
 
 const defaultProps = {};
 
+const initialState = {
+	inputValues: {},
+	touched:     {},
+	messages:    {},
+	actions:     [ "submit" ],
+	alert:       null,
+};
+
 /**
  * Component which contains an input form
  */
@@ -51,12 +59,7 @@ export class FormGenerator extends React.Component {
 	constructor( props ) {
 		super( props );
 
-		this.state = {
-			inputValues: {},
-			touched:     {},
-			messages:    {},
-			actions:     [ "submit" ],
-		};
+		this.state = { ...initialState };
 
 		this.fieldList = [];
 		for ( const name in this.props.fields ) {
@@ -85,9 +88,12 @@ export class FormGenerator extends React.Component {
 		};
 
 		this.mounted = false;
+		this.alertTimeout = null;
 
 		this.handleInputChange = this.handleInputChange.bind( this );
-		this.onSubmit = this.onSubmit.bind( this );
+		this.runValidation = this.runValidation.bind( this );
+		this.handleSubmit = this.handleSubmit.bind( this );
+		this.handleReset = this.handleReset.bind( this );
 	}
 
 	/**
@@ -145,10 +151,45 @@ export class FormGenerator extends React.Component {
 	}
 
 	/**
-	 * Wraps the given input component into a new div-container.
-	 * A label-element will be added if requested.
+	 * Creates a React component
+	 * if a global alert-message shall be shown.
+	 *
+	 * The information message automatically hide after some seconds.
+	 *
+	 * @returns	{object}
+	 *		New React component representing the information-message.
 	 */
-	labelGenerator( fieldData, extraAttributes = {} ) {
+	generateAlert() {
+		if ( this.state.alert != null && this.alertTimeout == null ) {
+			this.alertTimeout = setTimeout( () => {
+				this.alertTimeout = null;
+				if ( this.mounted ) {
+					this.setState( { alert: null } );
+				}
+			}, 7000 );
+		}
+
+		return <Alert key="form-alert" color="success" isOpen={this.state.alert != null}>{this.state.alert}</Alert>;
+	}
+
+	/**
+	 * Create a React component
+	 * which represents a label related to the given input field.
+	 *
+	 * @param	{object}	fieldData
+	 * @param	{string}	fieldData.name
+	 * @param	{string}	fieldData.type
+	 * @param	{string}	fieldData.id
+	 * @param	{null|string}	fieldData.label
+	 *
+	 * @param	{object}	extraAttributes
+	 *		Optional: Additional attributes which shall be included in the main-tag
+	 *		of the new component.
+	 *
+	 * @returns	{object}
+	 *		New React component
+	 */
+	generateLabel( fieldData, extraAttributes = {} ) {
 		assert( fieldData != null && typeof fieldData === "object",
 			"Invalid argument \"fieldData\"" );
 
@@ -164,6 +205,7 @@ export class FormGenerator extends React.Component {
 
 		const fieldProperties = {
 			...extraAttributes,
+
 			key:       `${name}-label`,
 			className: `${label ? "label" : "nolabel"} ${type}`,
 		};
@@ -180,25 +222,70 @@ export class FormGenerator extends React.Component {
 	}
 
 	/**
-	 * If there is a message for the given input field,
-	 * a matching component to show this text is composed.
+	 * Creates a React component
+	 * if there is an error-message related to the input field with the given name.
 	 *
-	 * @param	{string}	inputName
+	 * @param	{string}	fieldName
+	 *
+	 * @returns	{object|null}
+	 *		New React component representing the error-message; or
+	 *		Null if there is no related error.
 	 */
-	messageGenerator( inputName ) {
-		assert( typeof inputName === "string" && inputName !== "", "Invalid argument" );
+	generateMessage( fieldName ) {
+		assert( typeof fieldName === "string" && fieldName !== "", "Invalid argument" );
 
-		return ( inputName === "submit" || this.state.touched[inputName] ) && this.state.messages[inputName]
-			? <FormText key={`${inputName}-message`}>{this.state.messages[inputName]}</FormText>
+		return ( fieldName === "submit" || this.state.touched[fieldName] ) && this.state.messages[fieldName]
+			? <FormText key={`${fieldName}-message`} color="danger">{this.state.messages[fieldName]}</FormText>
 			: null;
 	}
 
 	/**
+	 * Creates a React component
+	 * which contains buttons to submit or reset the form input.
+	 *
+	 * @returns	{object}
+	 *		New React component
+	 */
+	generateFinalRow() {
+		const buttons = {};
+
+		[ "submit", "reset" ].forEach( type => {
+			const allTypeFields = Object.keys( this.fieldList )
+				.filter( name => this.fieldList[name].type === type );
+			const activeTypeFields = allTypeFields
+				.filter( name => this.state.actions.includes( name ) );
+
+			if ( activeTypeFields.length > 0 ) {
+				buttons[type] = FieldTypes[type].generateField.call( this, this.fieldList[activeTypeFields[0]] );
+			} else if ( allTypeFields.length > 0 ) {
+				buttons[type] = FieldTypes[type].generateField.call( this, this.fieldList[allTypeFields[0]] );
+			} else if ( type === "submit" ) {
+				buttons[type] = FieldTypes[type].generateField.call( this, {} );
+			}
+		} );
+
+		const submitMessage = this.generateMessage( "submit" );
+
+		return <FormGroup key="form-final" row>
+			<Col sm={{ size: 9, offset: 3 }}>
+				{buttons.submit}{" "}{buttons.reset}
+				{submitMessage}
+			</Col>
+		</FormGroup>;
+	}
+
+	/**
+	 * Creates a React component
+	 * which represent the input field with the given name
 	 *
 	 * @param	{string}	name
+	 *
+	 * @returns	{object}
+	 *		New React component
 	 */
 	generateField( name ) {
 		const data = this.fieldList[name];
+
 		assert( data != null && typeof data === "object",
 			`Invalid argument "name" (${name})` );
 		assert( typeof data.type === "string" && typeof FieldTypes[data.type] === "object",
@@ -206,9 +293,9 @@ export class FormGenerator extends React.Component {
 
 		const id = `${this.props.formClass || "form"}-${data.name}`;
 
-		const label = this.labelGenerator( data, { sm: 3 } );
+		const label = this.generateLabel( data, { sm: 3 } );
 		const field = FieldTypes[data.type].generateField.call( this, data, { id } );
-		const message = this.messageGenerator( data.name );
+		const message = this.generateMessage( data.name );
 
 		return <FormGroup row key={name}>
 			{label}
@@ -220,7 +307,8 @@ export class FormGenerator extends React.Component {
 	}
 
 	/**
-	 * Handles the change event of any form field
+	 * Handles events
+	 * whenever an input field of the form is changed
 	 *
 	 * @param	{object}	event
 	 *		Description of the event to handle
@@ -240,14 +328,43 @@ export class FormGenerator extends React.Component {
 	}
 
 	/**
-	 * Handles events whenever a user clicks on one of the submit buttons
+	 * Handles events
+	 * whenever a user clicks on one of the form's submit buttons
 	 */
-	onSubmit( event ) {
-		event.preventDefault();
+	handleSubmit( event = null ) {
+		if ( event != null ) {
+			event.preventDefault();
+		}
 
 		if ( typeof this.props.handleSubmit === "function" ) {
-			this.props.handleSubmit( this.state.inputValues );
+			return Promise.resolve(
+				this.props.handleSubmit( this.state.inputValues, event ? event.target.name : null )
+			)
+				.then( alert => {
+					if ( this.mounted ) {
+						const stateChange = { ...initialState };
+						if ( typeof alert === "string" && alert !== "" ) {
+							stateChange.alert = alert;
+						}
+
+						this.setState( stateChange, this.runValidation );
+					}
+				} );
 		}
+
+		return null;
+	}
+
+	/**
+	 * Handles events
+	 * whenever a user clicks a button to reset the form's input data.
+	 */
+	handleReset( event = null ) {
+		if ( event != null ) {
+			event.preventDefault();
+		}
+
+		this.setState( { ...initialState }, () => this.runValidation() );
 	}
 
 	/**
@@ -258,39 +375,16 @@ export class FormGenerator extends React.Component {
 			return <div className="empty-form"></div>;
 		}
 
-		const formGroups = [];
-		const submitFields = [];
-		for ( const name in this.fieldList ) {
-			if ( typeof name === "string" && name !== "" ) {
-				const data = this.fieldList[name];
-				if ( data.type === "submit" ) {
-					submitFields.push( FieldTypes.submit.generateField.call( this, data ) );
-				} else {
-					const newField = this.generateField( name );
-					if ( newField != null ) {
-						formGroups.push( newField );
-					}
-				}
-			}
-		}
+		const formFields = Object.keys( this.fieldList )
+			.filter( name => [ "submit", "reset" ].includes( this.fieldList[name].type ) === false )
+			.map( name => this.generateField( name ) )
+			.filter( component => component != null );
 
-		if ( submitFields.length === 0 ) {
-			submitFields.push( FieldTypes.submit.generateField.call( this, { value: "Submit" } ) );
-		}
-		const submitMessage = this.messageGenerator( "submit" );
-
-		return <Form
-			className={this.props.formClass ? `form ${this.props.formClass}` : "form"}
-			onSubmit={this.onSubmit}
-		>
-			{formGroups}
-			<FormGroup row>
-				<Col sm={{ size: 9, offset: 3 }}>
-					{submitFields}
-					{submitMessage}
-				</Col>
-			</FormGroup>
-		</Form>;
+		return React.createElement(
+			Form,
+			this.props.formClass ? { className: this.props.formClass } : {},
+			[ this.generateAlert(), ...formFields, this.generateFinalRow() ]
+		);
 	}
 }
 

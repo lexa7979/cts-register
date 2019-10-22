@@ -27,10 +27,12 @@ import input from "./input";
 import textarea from "./textarea";
 import radio from "./radio";
 import submit from "./submit";
+import reset from "./reset";
 
 export default {
 	input,
 	textarea,
 	radio,
 	submit,
+	reset,
 };

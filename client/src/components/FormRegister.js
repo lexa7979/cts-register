@@ -64,7 +64,7 @@ export class FormRegister extends React.Component {
 			attending: {
 				type:    "radio",
 				label:   "Are you going to attend the conference?",
-				options: [ "Yes", "No", "Maybe" ],
+				options: { yes: "Yes", no: "No", maybe: "Maybe" },
 			},
 			submit: {
 				type:  "submit",
@@ -73,6 +73,10 @@ export class FormRegister extends React.Component {
 			update: {
 				type:  "submit",
 				label: "Update",
+			},
+			reset: {
+				type:  "reset",
+				label: "Reset",
 			},
 		};
 
@@ -90,6 +94,10 @@ export class FormRegister extends React.Component {
 	 *		Resolves with an object stating errors and possible submit-actions
 	 */
 	validateData( inputData ) {
+		if ( inputData.firstname === "" && inputData.lastname === "" && inputData.attending === "" ) {
+			return Promise.resolve( { actions: [], messages: {} } );
+		}
+
 		const messages = {
 			firstname: inputData.firstname.trim() ? null : "Missing input: Firstname",
 			lastname:  inputData.lastname.trim() ? null : "Missing input: Lastname",
@@ -99,7 +107,7 @@ export class FormRegister extends React.Component {
 				: "Can't connect to the database server - please try again, later",
 		};
 		if ( Object.keys( messages ).filter( key => messages[key] != null ).length > 0 ) {
-			return Promise.resolve( { actions: [], messages } );
+			return Promise.resolve( { actions: [ "reset" ], messages } );
 		}
 
 		return Axios.get(
@@ -112,21 +120,21 @@ export class FormRegister extends React.Component {
 					if ( success ) {
 						if ( item.attending.toLowerCase() === inputData.attending.toLowerCase() ) {
 							return {
-								actions:  [],
+								actions:  [ "reset" ],
 								messages: { submit: "You answer was already saved, before." },
 							};
 						}
-						return {
-							actions:  [ "update" ],
-							messages: { submit: "Do you want to change your previous answer?" },
-						};
+						return { actions: [ "update", "reset" ], messages: {} };
 					}
 					if ( code === "NOTFOUND" ) {
-						return { actions: [ "submit" ], messages: {} };
+						return { actions: [ "submit", "reset" ], messages: {} };
 					}
 				}
 
-				return { actions: [], messages: { submit: response.data.error || response.data } };
+				return {
+					actions:  [ "reset" ],
+					messages: { submit: response.data.error || response.data },
+				};
 			} );
 	}
 
@@ -135,21 +143,21 @@ export class FormRegister extends React.Component {
 	 *
 	 * @param	{object}	inputData
 	 */
-	handleSubmit( inputData ) {
+	handleSubmit( inputData, fieldName ) {
 		return this.validateData( inputData )
 			.then( result => {
 				assert( Array.isArray( result.actions ) && result.actions.length > 0 );
+
 				const data = {
 					firstname: inputData.firstname,
 					lastname:  inputData.lastname,
 					attending: inputData.attending,
 				};
+
 				return Axios.put( "/attendee", data, { validateStatus: null } );
 			} )
-			.then( response => {
-				// eslint-disable-next-line no-console
-				console.log( "Form was submitted", response );
-			} );
+			.then( () => `Thank you, ${inputData.firstname}! `
+				+ `You data was ${fieldName === "update" ? "updated" : "stored"} on the server.` );
 	}
 
 	/**

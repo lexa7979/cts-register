@@ -51,19 +51,17 @@ export function generateField( data, extraAttributes = {} ) {
 		&& Array.isArray( this.state.actions ),
 		"Missing access to class Form"
 	);
-
 	assert( data !== null && typeof data === "object",
 		"Invalid argument \"data\"" );
+	assert( data.name == null || typeof data.name === "string",
+		`Invalid field property "name" (${data.name})` );
+	assert( data.label == null || typeof data.label === "string",
+		`Invalid field property "label" (${data.name}: ${data.label})` );
+	assert( data.focus == null || typeof data.focus === "boolean",
+		`Invalid field property "focus" (${data.name}: ${data.focus})` );
 
 	const { name = "submit", label = "Submit", focus = false } = data;
-	assert( name == null || typeof name === "string",
-		`Invalid field property "name" (${name})` );
-	assert( label == null || typeof label === "string",
-		`Invalid field property "label" (${name}: ${label})` );
-	assert( focus == null || typeof focus === "boolean",
-		`Invalid field property "focus" (${name}: ${focus})` );
-
-	const disabled = this.state.actions.indexOf( name ) === -1 ? true : null;
+	const disabled = this.state.actions.includes( name ) ? null : true;
 
 	const fieldProperties = {
 		...extraAttributes,
@@ -73,6 +71,7 @@ export function generateField( data, extraAttributes = {} ) {
 		value:     label,
 		autoFocus: focus ? "autofocus" : null,
 
+		onClick:   this.handleSubmit,
 		color:     disabled ? null : "primary",
 		disabled,
 	};

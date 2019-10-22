@@ -7,7 +7,7 @@
     <h2>
       Component FormRegister - when rendering with no properties - delivers expected result  (-> check snapshot, too)
     </h2>
-    <form class="form register">
+    <form class="register">
       <div class="row form-group">
         <label for="register-firstname"
                class="label input col-sm-3 col-form-label"
@@ -51,31 +51,31 @@
           <div id="register-attending"
                class="col"
           >
-            <div class="form-check">
+            <div class="form-check form-check-inline">
               <label class="form-check-label">
                 <input type="radio"
                        name="attending"
-                       value="Yes"
+                       value="yes"
                        class="form-check-input"
                 >
                 Yes
               </label>
             </div>
-            <div class="form-check">
+            <div class="form-check form-check-inline">
               <label class="form-check-label">
                 <input type="radio"
                        name="attending"
-                       value="No"
+                       value="no"
                        class="form-check-input"
                 >
                 No
               </label>
             </div>
-            <div class="form-check">
+            <div class="form-check form-check-inline">
               <label class="form-check-label">
                 <input type="radio"
                        name="attending"
-                       value="Maybe"
+                       value="maybe"
                        class="form-check-input"
                 >
                 Maybe
@@ -86,18 +86,18 @@
       </div>
       <div class="row form-group">
         <div class="col-sm-9 offset-sm-3">
-          <button name="submit"
+          <button type="button"
+                  name="submit"
                   value="Submit"
                   class="btn btn-primary"
           >
             Submit
           </button>
-          <button name="update"
-                  value="Update"
+          <button type="button"
                   disabled
                   class="btn btn-secondary disabled"
           >
-            Update
+            Reset
           </button>
         </div>
       </div>
