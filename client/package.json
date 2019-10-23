@@ -1,7 +1,9 @@
 {
-	"name": "cts-next-gen-client",
+	"name": "cts-register-client",
 	"version": "0.1.0",
 	"description": "User interface of my example React.js app",
+	"author": "alexander.urban@cygni.se",
+	"license": "MIT",
 	"dependencies": {
 		"axios": "^0.19.0",
 		"bootstrap": "^4.3.1",

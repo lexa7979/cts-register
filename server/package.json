@@ -1,5 +1,5 @@
 {
-	"name": "cts-next-gen-server",
+	"name": "cts-register-server",
 	"version": "0.1.0",
 	"description": "Basic database backend to serve my example React.js app",
 	"main": "app.js",

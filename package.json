@@ -1,7 +1,9 @@
 {
-	"name": "cts-next-gen",
+	"name": "cts-register",
 	"version": "0.1.0",
-	"description": "Example React.js app showing input form to register attendees to a conference",
+	"description": "Example React.js app showing an input form to register attendees to a conference",
+	"author": "alexander.urban@cygni.se",
+	"license": "MIT",
 	"dependencies": {},
 	"scripts": {
 		"lint": "eslint **/*.js"
