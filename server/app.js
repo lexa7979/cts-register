@@ -29,11 +29,9 @@ const port = 3011;
 app.use( express.json() );
 
 const routes = require( "./routes" );
-Object.keys( routes ).forEach( path => {
-	if ( typeof routes[path].handleAppRequest === "function" ) {
-		routes[path].handleAppRequest.call( app, `/${path}` );
-	}
-} );
+Object.keys( routes )
+	.filter( path => typeof routes[path].handleAppRequest === "function" )
+	.forEach( path => routes[path].handleAppRequest.call( app, `/${path}` ) );
 
 app.listen( port, () => {
 	// eslint-disable-next-line no-console
