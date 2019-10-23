@@ -8,6 +8,11 @@
       Component FormRegister - when rendering with no properties - delivers expected result  (-> check snapshot, too)
     </h2>
     <form class="register">
+      <div class="alert alert-danger fade"
+           role="alert"
+      >
+        Can&#x27;t process your input, right now: No connection to database server
+      </div>
       <div class="row form-group">
         <label for="register-firstname"
                class="label input col-sm-3 col-form-label"
