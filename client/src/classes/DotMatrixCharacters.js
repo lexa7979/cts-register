@@ -87,8 +87,13 @@ const CHARMAP = {
  */
 export class DotMatrixCharacters {
 	/**
+	 * Determines if there is a definition of the given character
+	 * and its dots.
 	 *
-	 * @param {*} character
+	 * @param	{string}	character
+	 *
+	 * @returns	{boolean}
+	 *		True iff the character is known
 	 */
 	static supports( character ) {
 		return typeof character === "string"
@@ -97,8 +102,13 @@ export class DotMatrixCharacters {
 	}
 
 	/**
+	 * Delivers the coordinates of the given character's dots.
 	 *
-	 * @param {*} character
+	 * @param	{string}	character
+	 *
+	 * @returns	{Array|null}
+	 *		List of tuples representing the character's dots; or
+	 *		Null if the character is not defined, yet
 	 */
 	static getMatrix( character ) {
 		if (

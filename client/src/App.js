@@ -40,7 +40,7 @@ export class App extends React.Component {
 		super( props );
 
 		this.state = {
-			serverAvailable: false,
+			serverAvailable: null,
 		};
 	}
 
@@ -48,16 +48,17 @@ export class App extends React.Component {
 	 * Actions to take when component is ready
 	 */
 	componentDidMount() {
-		this.checkServerstateTimeout = setTimeout( this.checkServerstate.bind( this ), 3000 );
+		this.checkServerstateInterval = setInterval( this.checkServerstate.bind( this ), 3000 );
+		this.checkServerstate();
 	}
 
 	/**
 	 * Actions to take before component will be removed
 	 */
 	componentWillUnmount() {
-		if ( this.checkServerstateTimeout ) {
-			clearTimeout( this.checkServerstateTimeout );
-			this.checkServerstateTimeout = null;
+		if ( this.checkServerstateInterval ) {
+			clearInterval( this.checkServerstateInterval );
+			this.checkServerstateInterval = null;
 		}
 	}
 
@@ -69,10 +70,16 @@ export class App extends React.Component {
 		return Axios.get( "/health" )
 			.then( result => {
 				const serverAvailable = result.status === 200 && result.data === "OK";
-				this.setState( { serverAvailable } );
+				if ( serverAvailable !== this.state.serverAvailable ) {
+					this.setState( { serverAvailable } );
+					this.forceUpdate();
+				}
 			} )
 			.catch( () => {
-				this.setState( { serverAvailable: false } );
+				if ( this.state.serverAvailable !== false ) {
+					this.setState( { serverAvailable: false } );
+					this.forceUpdate();
+				}
 			} );
 	}
 
@@ -87,7 +94,7 @@ export class App extends React.Component {
 						text={"CYGNI TECH SUMMIT\n2020_"}
 						background="#333"
 						color={[ "white", "#9c4" ]}
-						zoom={2}
+						zoom={4}
 						animation="running-point:#09f"
 					/>
 				</div>

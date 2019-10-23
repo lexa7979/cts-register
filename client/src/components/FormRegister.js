@@ -53,7 +53,6 @@ export class FormRegister extends React.Component {
 				type:        "input",
 				label:       "Firstname:",
 				placeholder: "Type in your firstname.",
-				required:    true,
 				focus:       true,
 			},
 			lastname: {
@@ -94,20 +93,17 @@ export class FormRegister extends React.Component {
 	 *		Resolves with an object stating errors and possible submit-actions
 	 */
 	validateData( inputData ) {
-		if ( inputData.firstname === "" && inputData.lastname === "" && inputData.attending === "" ) {
-			return Promise.resolve( { actions: [], messages: {} } );
-		}
-
 		const messages = {
 			firstname: inputData.firstname.trim() ? null : "Missing input: Firstname",
 			lastname:  inputData.lastname.trim() ? null : "Missing input: Lastname",
 			attending: inputData.attending ? null : "Choose one of the alternatives",
-			submit:    this.props.serverAvailable
-				? null
-				: "Can't connect to the database server - please try again, later",
 		};
 		if ( Object.keys( messages ).filter( key => messages[key] != null ).length > 0 ) {
 			return Promise.resolve( { actions: [ "reset" ], messages } );
+		}
+
+		if ( !this.props.serverAvailable ) {
+			return Promise.resolve( { actions: [ "reset" ], messages: {} } );
 		}
 
 		return Axios.get(
@@ -139,11 +135,16 @@ export class FormRegister extends React.Component {
 	}
 
 	/**
-	 *
+	 * Callback for class FormGenerator
+	 * which will be used to store the entered user input.
 	 *
 	 * @param	{object}	inputData
+	 * @param	{string}	submitFieldName
+	 *
+	 * @returns	{Promise<string>}
+	 *		Resolves with a success-message which will be showed to the user
 	 */
-	handleSubmit( inputData, fieldName ) {
+	handleSubmit( inputData, submitFieldName ) {
 		return this.validateData( inputData )
 			.then( result => {
 				assert( Array.isArray( result.actions ) && result.actions.length > 0 );
@@ -157,18 +158,23 @@ export class FormRegister extends React.Component {
 				return Axios.put( "/attendee", data, { validateStatus: null } );
 			} )
 			.then( () => `Thank you, ${inputData.firstname}! `
-				+ `You data was ${fieldName === "update" ? "updated" : "stored"} on the server.` );
+				+ `You data was ${submitFieldName === "update" ? "updated" : "stored"} on the server.` );
 	}
 
 	/**
 	 * Composing output
 	 */
 	render() {
+		const disabled = this.props.serverAvailable
+			? null
+			: "Can't process your input, right now: No connection to database server";
+
 		return <FormGenerator
 			formClass="register"
 			fields={this.formFields}
 			handleSubmit={this.handleSubmit}
 			validateData={this.validateData}
+			disableWithMessage={disabled}
 		/>;
 	}
 }

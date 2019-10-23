@@ -37,6 +37,8 @@ const propTypes = {
 	handleSubmit: PropTypes.func.isRequired,
 	formClass:    PropTypes.string,
 	validateData: PropTypes.func,
+
+	disableWithMessage: PropTypes.string,
 };
 
 const defaultProps = {};
@@ -112,12 +114,26 @@ export class FormGenerator extends React.Component {
 	}
 
 	/**
+	 * Actions to take after component was just updated
+	 *
+	 * @param	{object}	prevProps
+	 */
+	componentDidUpdate( prevProps ) {
+		if ( prevProps.disableWithMessage !== this.props.disableWithMessage ) {
+			this.runValidation();
+		}
+	}
+
+	/**
 	 * Validates the form inputs if props.validateData is given
 	 *
 	 * If another (asynchronous) validation is already in progress,
 	 * nothing will be done, now. Still, it's memorised that
 	 * another validation shall be run just after the active one
 	 * has finished.
+	 *
+	 * @returns	{Promise}
+	 *		Resolves after the validation finished
 	 */
 	runValidation() {
 		if ( typeof this.props.validateData !== "function" || !this.mounted ) {
@@ -223,6 +239,38 @@ export class FormGenerator extends React.Component {
 
 	/**
 	 * Creates a React component
+	 * which represent the input field with the given name
+	 *
+	 * @param	{string}	name
+	 *
+	 * @returns	{object}
+	 *		New React component
+	 */
+	generateField( name ) {
+		const data = this.fieldList[name];
+
+		assert( data != null && typeof data === "object",
+			`Invalid argument "name" (${name})` );
+		assert( typeof data.type === "string" && typeof FieldTypes[data.type] === "object",
+			`Invalid field type (${data.type})` );
+
+		const id = `${this.props.formClass || "form"}-${data.name}`;
+
+		const label = this.generateLabel( data, { sm: 3 } );
+		const field = FieldTypes[data.type].generateField.call( this, data, { id } );
+		const message = this.generateMessage( data.name );
+
+		return <FormGroup row key={name}>
+			{label}
+			<Col sm={9}>
+				{field}
+				{message || ""}
+			</Col>
+		</FormGroup>;
+	}
+
+	/**
+	 * Creates a React component
 	 * if there is an error-message related to the input field with the given name.
 	 *
 	 * @param	{string}	fieldName
@@ -252,8 +300,9 @@ export class FormGenerator extends React.Component {
 		[ "submit", "reset" ].forEach( type => {
 			const allTypeFields = Object.keys( this.fieldList )
 				.filter( name => this.fieldList[name].type === type );
-			const activeTypeFields = allTypeFields
-				.filter( name => this.state.actions.includes( name ) );
+			const activeTypeFields = type === "submit" && Boolean( this.props.disableWithMessage )
+				? []
+				: allTypeFields.filter( name => this.state.actions.includes( name ) );
 
 			if ( activeTypeFields.length > 0 ) {
 				buttons[type] = FieldTypes[type].generateField.call( this, this.fieldList[activeTypeFields[0]] );
@@ -270,38 +319,6 @@ export class FormGenerator extends React.Component {
 			<Col sm={{ size: 9, offset: 3 }}>
 				{buttons.submit}{" "}{buttons.reset}
 				{submitMessage}
-			</Col>
-		</FormGroup>;
-	}
-
-	/**
-	 * Creates a React component
-	 * which represent the input field with the given name
-	 *
-	 * @param	{string}	name
-	 *
-	 * @returns	{object}
-	 *		New React component
-	 */
-	generateField( name ) {
-		const data = this.fieldList[name];
-
-		assert( data != null && typeof data === "object",
-			`Invalid argument "name" (${name})` );
-		assert( typeof data.type === "string" && typeof FieldTypes[data.type] === "object",
-			`Invalid field type (${data.type})` );
-
-		const id = `${this.props.formClass || "form"}-${data.name}`;
-
-		const label = this.generateLabel( data, { sm: 3 } );
-		const field = FieldTypes[data.type].generateField.call( this, data, { id } );
-		const message = this.generateMessage( data.name );
-
-		return <FormGroup row key={name}>
-			{label}
-			<Col sm={9}>
-				{field}
-				{message || ""}
 			</Col>
 		</FormGroup>;
 	}
@@ -375,6 +392,10 @@ export class FormGenerator extends React.Component {
 			return <div className="empty-form"></div>;
 		}
 
+		const disabledMessage = this.props.disableWithMessage
+			? <Alert key="disabled-message" color="danger">{this.props.disableWithMessage}</Alert>
+			: null;
+
 		const formFields = Object.keys( this.fieldList )
 			.filter( name => [ "submit", "reset" ].includes( this.fieldList[name].type ) === false )
 			.map( name => this.generateField( name ) )
@@ -383,7 +404,7 @@ export class FormGenerator extends React.Component {
 		return React.createElement(
 			Form,
 			this.props.formClass ? { className: this.props.formClass } : {},
-			[ this.generateAlert(), ...formFields, this.generateFinalRow() ]
+			[ disabledMessage, this.generateAlert(), ...formFields, this.generateFinalRow() ]
 		);
 	}
 }
