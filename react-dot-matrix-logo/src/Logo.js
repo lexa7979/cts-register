@@ -28,9 +28,9 @@ import assert from "assert";
 import React from "react";
 import PropTypes from "prop-types";
 
-import SortedPointsList from "../classes/SortedPointsList";
-import DotMatrixCharacters from "../classes/DotMatrixCharacters";
-import Animation from "../classes/Animation";
+import SortedPointsList from "./classes/SortedPointsList";
+import DotMatrixCharacters from "./classes/DotMatrixCharacters";
+import Animation from "./classes/Animation";
 
 const propTypes = {
 	text:       PropTypes.string.isRequired,

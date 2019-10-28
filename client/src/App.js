@@ -23,10 +23,11 @@
  */
 
 import React from "react";
+import Logo from "@lexa79/react-dot-matrix-logo";
 
 import "./App.scss";
 
-import { FormRegister, Logo } from "./components";
+import { FormRegister } from "./components";
 import Axios from "axios";
 
 /**

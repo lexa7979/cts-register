@@ -23,4 +23,3 @@
  */
 
 export { FormRegister } from "./FormRegister";
-export { Logo } from "./Logo";

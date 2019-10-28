@@ -1,0 +1,32 @@
+{
+  "name": "@lexa79/react-dot-matrix-logo",
+  "version": "0.0.1",
+  "description": "React.js component to show dynamically generated with some animated text of dot-matrix-characters",
+  "main": "dist/index.js",
+  "scripts": {
+	"prepublishOnly": "babel ./src --out-dir ./dist -s inline",
+	"publish:public": "npm publish --access public"
+  },
+  "keywords": [
+    "React.js",
+    "logo",
+    "SVG"
+  ],
+  "author": "alexander.urban@cygni.se",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/cli": "^7.6.4",
+    "@babel/core": "^7.6.4",
+    "@babel/preset-env": "^7.6.3",
+    "@babel/preset-react": "^7.6.3",
+    "assert": "^2.0.0",
+    "react": "^16.11.0"
+  },
+  "peerDependencies": {
+    "assert": "^2.0.0",
+    "react": "^16.8.0"
+  },
+  "files": [
+    "dist/*"
+  ]
+}
