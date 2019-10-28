@@ -4,8 +4,10 @@
   "description": "React.js component to show dynamically generated with some animated text of dot-matrix-characters",
   "main": "dist/index.js",
   "scripts": {
-	"prepublishOnly": "babel ./src --out-dir ./dist -s inline",
-	"publish:public": "npm publish --access public"
+    "test": "jest --setupTestFrameworkScriptFile=./src/setupTests.js --reporters=jest-spec-reporter",
+    "test:update": "jest --setupTestFrameworkScriptFile=./src/setupTests.js --updateSnapshot",
+    "prepublishOnly": "babel ./src --out-dir ./dist -s inline",
+    "publish:public": "npm publish --access public"
   },
   "keywords": [
     "React.js",
@@ -19,11 +21,16 @@
     "@babel/core": "^7.6.4",
     "@babel/preset-env": "^7.6.3",
     "@babel/preset-react": "^7.6.3",
-    "assert": "^2.0.0",
-    "react": "^16.11.0"
+    "@lexa79/jest-matchers": "^1.0.3",
+    "enzyme": "^3.10.0",
+    "enzyme-adapter-react-16": "^1.15.1",
+    "enzyme-to-json": "^3.4.3",
+    "jest": "^24.9.0",
+    "jest-spec-reporter": "^1.0.8",
+    "react": "^16.11.0",
+    "react-dom": "^16.11.0"
   },
   "peerDependencies": {
-    "assert": "^2.0.0",
     "react": "^16.8.0"
   },
   "files": [
